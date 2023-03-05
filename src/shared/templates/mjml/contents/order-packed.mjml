@@ -1,0 +1,106 @@
+<mj-section padding="16px 16px 0 16px">
+  <mj-column>
+    <mj-text>
+      <h1 class="heading">Cám ơn quý khách <span class="blue-text">{{customerLastName}}</span> đặt hàng trên Color Man Food </h1>
+    </mj-text>
+  </mj-column>
+</mj-section>
+<mj-section padding="0px 16px">
+  <mj-column>
+    <mj-text align="left" padding="0px">
+      <p class="introduce">Xin chào <span class="blue-text">{{customerLastName}}</span></p>
+      <p class="introduce"><span class="bold-text">Color Man Food</span> xin thông báo đơn hàng <span class="blue-text">#{{incrementId}}</span> của quý khách đã được đóng gói </p>
+    </mj-text>
+  </mj-column>
+</mj-section>
+<!--  info shipping-->
+<mj-section padding="0px 16px" css-class="mobile-column">
+  <mj-group>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p class="info-title">Địa chỉ giao hàng:</p>
+      </mj-text>
+    </mj-column>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p class="info-value">{{shippingAddress}}</p>
+      </mj-text>
+    </mj-column>
+  </mj-group>
+</mj-section>
+
+<mj-section padding="8px 16px 0 16px" css-class="mobile-column">
+  <mj-group>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p class="info-title">Tổng giá trị đơn hàng:</p>
+      </mj-text>
+    </mj-column>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p class="info-value">{{formatCurrency baseGrandTotal}}</p>
+      </mj-text>
+    </mj-column>
+  </mj-group>
+</mj-section>
+<mj-section padding="8px 16px 0 16px" css-class="mobile-column">
+  <mj-group>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p class="info-title">Phương thức thanh toán:</p>
+      </mj-text>
+    </mj-column>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p class="info-value">{{paymentMethod}}</p>
+      </mj-text>
+    </mj-column>
+  </mj-group>
+</mj-section>
+<!--  order items -->
+<mj-include path="./partials/order-detail.mjml" />
+<!--  divider -->
+<mj-section padding="0 16px">
+  <mj-column>
+    <mj-divider border-width="1px" border-style="solid" border-color="lightgrey" padding="10px 0" />
+  </mj-column>
+</mj-section>
+<!--  total -->
+<mj-section padding="0 16px">
+  <mj-column>
+    <mj-table padding="0px" css-class="item-container">
+      <tr>
+        <td width="70%">
+          <p class="total-title">Tổng cộng:</p>
+        </td>
+        <td>
+          <p class="text-right">{{formatCurrency baseSubtotalInclTax}}</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="total-title">Khuyến mãi:</p>
+        </td>
+        <td>
+           <p class="text-right">{{formatCurrency promotion}}</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="total-title">Phí vận chuyển:</p>
+        </td>
+        <td>
+          <p class="text-right">{{formatCurrency baseShippingInclTax}}</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="total-title" style="font-weight:bold">Tổng cộng tiền thanh toán:</p>
+        </td>
+        <td>
+          <p class="text-right" style="font-weight:bold">{{formatCurrency baseGrandTotal}}</p>
+        </td>
+      </tr>
+    </mj-table>
+  </mj-column>
+</mj-section>

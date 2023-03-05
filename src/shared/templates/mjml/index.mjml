@@ -1,0 +1,55 @@
+<mjml>
+    <mj-head>
+        <mj-font name="Nunito Sans" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&display=swap" />
+        <mj-attributes>
+            <mj-text align="center" color="#555" line-height="1.3" font-family="'Nunito Sans', sans-serif" />
+        </mj-attributes>
+        <mj-style inline="inline"
+            >p{margin:0;padding-bottom:8px} .red-text { color: #D3303A !important; } .yellow-text { color:#FFBA0A !important; } .blue-text {
+            color: blue !important; } .bold-text{font-weight:700;} .heading {font-size: 16px; font-weight:700; color: #25313E, } .introduce
+            {font-size: 12px; font-weight:400; color: #25313E; font-family: 'Nunito Sans', sans-serif; padding-bottom:8px;} .info-title
+            {font-size: 12px; font-weight:700; color: #25313E; font-family: 'Nunito Sans', sans-serif} .info-value {font-size: 12px;
+            font-weight:400; color: #25313E;padding:0} .title {font-size: 14px; font-weight:700; color: #25313E; font-family: 'Nunito Sans',
+            sans-serif;} .item-title{color: #B3B7BC; font-size: 12px; padding:0} .base-line {vertical-align: middle} .text-right{text-align:
+            right;}.d-none{display:none;} .text-left{float:left} .text-right{float:right;} .item-container
+            .empty-item:last-child{padding-bottom:20px;} .total-value{display:inline-block;float:right;} .total-title{ width: 70%;
+            text-align: right; display: inline-block;}</mj-style
+        >
+        <mj-style>
+            @media (max-width:480px){ .mobile-total p{ text-align:left } .total-title{ width: auto; text-align: left !important; display:
+            inline-block;} .mobile-column div:first-of-type{ display: flex !important; flex-direction: column; } }
+        </mj-style>
+    </mj-head>
+    <mj-body>
+        <mj-section padding="0px">
+            <mj-column>
+                <mj-image src="{{logoUrl}}" width="128px" align="center" href="{{websiteLink}}" />
+            </mj-column>
+        </mj-section>
+        <mj-include path="./contents/order-confirm.mjml" tag="content" />
+        <!--  footer -->
+        <mj-section padding="10px 16px 0 16px">
+            <mj-column>
+                <mj-divider border-width="1px" border-style="solid" border-color="lightgrey" padding="5px" padding-bottom="0" />
+                <mj-social font-size="12px" line-height="16px" icon-size="16px" mode="horizontal" padding="0" align="right">
+                    <mj-social-element icon-size="0">Giữ liên hệ nhé!</mj-social-element>
+                    <mj-social-element name="facebook" href="{{facebookLink}}" src="{{facebookImageUrl}}"></mj-social-element>
+                    <mj-social-element name="youtube" href="{{youtubeLink}}" src="{{youtubeImageUrl}}"> </mj-social-element>
+                </mj-social>
+                <mj-divider border-width="1px" border-style="solid" border-color="lightgrey" padding="5px" />
+            </mj-column>
+        </mj-section>
+        <!--  footer -->
+        <mj-section padding="10px 16px 0 16px">
+            <mj-column>
+                <mj-text align="center" padding="0">
+                    <p class="introduce">
+                        Đây là email tự động, vui lòng không trả lời email này.Mọi thắc mắc và góp ý, quý khách vui lòng liên hệ DGD thông
+                        qua hotline <span class="yellow-text">0900885242</span> hoặc địa chỉ email:
+                        <span class="yellow-text">support@dgd.com</span>
+                    </p>
+                </mj-text>
+            </mj-column>
+        </mj-section>
+    </mj-body>
+</mjml>

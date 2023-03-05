@@ -1,0 +1,25 @@
+<mj-section padding="16px 16px 0 16px">
+  <mj-column>
+    <mj-text>
+      <h1 class="heading">Phòng đấu giá cho tài sản mà quý khách đăng ký đã được mở</h1>
+    </mj-text>
+  </mj-column>
+</mj-section>
+<mj-section padding="0px 16px">
+  <mj-column>
+    <mj-text align="left" padding="0px">
+      <p class="introduce">Xin chào quý khách,</p>
+      <p class="introduce"><span class="bold-text">DGD</span> xin thông báo phòng đấu giá cho tài sản <b'{{assetName}}'</b> với mã <span class="bold-text blue-text">#{{assetCode}}</span> mà bạn đăng ký đã được mở. Vui lòng đăng nhập vào ứng dụng hoặc click vào liên kết bên dưới để đi đến phòng đấu giá cho tài sản
+    </mj-text>
+  </mj-column>
+</mj-section>
+<!--  info shipping-->
+<mj-section padding="0px 16px" css-class="mobile-column">
+  <mj-group>
+    <mj-column>
+      <mj-text align="left" padding="0">
+        <p><b>Liên kết:</b> <span class="info-value blue-text">https://auction-web.vn01.zodinet.tech/asset/{{assetId}}</span></p>
+      </mj-text>
+    </mj-column>
+  </mj-group>
+</mj-section>
