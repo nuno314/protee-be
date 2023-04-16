@@ -16,11 +16,11 @@ export class FirebaseAuthStrategy extends PassportStrategy(Strategy, 'firebase-a
         // eslint-disable-next-line import/namespace
         this.defaultApp = firebase.initializeApp({
             // eslint-disable-next-line import/namespace
-            credential: firebase.credential.cert({
-                projectId: configServie.get('FIREBASE_PROJECT_ID'),
-                privateKey: configServie.get('FIREBASE_PRIVATE_KEY'),
-                clientEmail: configServie.get('CLIENT_EMAIL'),
-            }),
+            // credential: firebase.credential.cert({
+            //     projectId: configServie.get('FIREBASE_PROJECT_ID'),
+            //     privateKey: configServie.get('FIREBASE_PRIVATE_KEY'),
+            //     clientEmail: configServie.get('CLIENT_EMAIL'),
+            // }),
         });
     }
 
