@@ -45,6 +45,7 @@
         "firebase-admin": "^11.5.0",
         "handlebars": "^4.7.7",
         "moment": "^2.29.4",
+        "morgan": "^1.10.0",
         "nest-mqtt": "^0.2.0",
         "nestjs-newrelic": "^0.0.2",
         "passport-firebase-jwt": "^1.2.1",

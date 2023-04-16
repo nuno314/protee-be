@@ -5,7 +5,6 @@ import { forwardRef, Global, Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 
 import { CustomerProvider } from '../decorators/customer.factory';
-import { LocationModule } from '../modules/location/location.module';
 import { AppConfigService } from './services/app-config.service';
 import { BaseHttpService } from './services/base-http.service';
 import { LoggerService } from './services/logger.service';
@@ -59,7 +58,6 @@ const providers = [
                 },
             }),
         }),
-        forwardRef(() => LocationModule),
         HttpModule.registerAsync({
             useFactory: async (configService: AppConfigService) => ({
                 timeout: configService.getNumber('HTTP_TIMEOUT') || 3000,
