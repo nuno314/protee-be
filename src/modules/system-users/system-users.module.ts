@@ -5,7 +5,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { SystemUserController } from './controllers/system-users.controller';
 import { SystemUserEntity } from './entities/system-users.entity';
 import { SystemUserService } from './services/system-users.service';
-import { SystemUserProfile } from './system-users.profile';
+import { SystemUserProfile } from './system-users.mapper';
 
 @Module({
     imports: [

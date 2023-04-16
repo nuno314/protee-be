@@ -21,9 +21,4 @@ export class UpdateUserDto {
     @IsBoolean()
     @IsNotEmpty()
     isActive: boolean;
-
-    @ApiProperty()
-    @IsString()
-    @IsPhoneNumber("VI")
-    phoneNumber: string;
 }
