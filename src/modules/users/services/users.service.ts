@@ -1,0 +1,111 @@
+import { InjectMapper } from '@automapper/nestjs';
+import { Mapper } from '@automapper/core';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsOrder, ILike, Repository } from 'typeorm';
+import { PaginationRequestDto } from '../../../common/dto/pagination-request.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
+import { LoggerService } from '../../../shared/services/logger.service';
+import { UserDto } from '../dtos/domains/user.dto';
+import { UpdateUserDto } from '../dtos/requests/update-user.dto';
+import { UserEntity } from '../entities/users.entity';
+import { UpdateAccountDto } from '../dtos/requests/update-account.dto';
+
+@Injectable()
+export class UsersService {
+    constructor(
+        @Inject(REQUEST) private readonly _req,
+        @InjectRepository(UserEntity)
+        private readonly _userRepository: Repository<UserEntity>,
+        @InjectMapper() private readonly _mapper: Mapper,
+        private readonly _logger: LoggerService
+    ) {}
+
+    public async update(dto: UpdateUserDto): Promise<boolean> {
+        const user = await this._userRepository.findOneBy({ id: dto.id });
+
+        if (!user) throw new NotFoundException('user_not_found');
+
+        const updateUser = { ...user, ...dto };
+
+        try {
+            const result = await this._userRepository.save(updateUser, {
+                data: { request: this._req }
+            });
+            return !!result;
+        } catch (err) {
+            this._logger.error(err);
+            return false;
+        }
+    }
+    public async updateProfile(
+        userId: string,
+        dto: UpdateAccountDto
+    ): Promise<boolean> {
+        const user = await this._userRepository.findOneBy({ id: userId });
+
+        if (!user) throw new NotFoundException('user_not_found');
+
+        const updateUser = { ...user, ...dto };
+
+        try {
+            const result = await this._userRepository.save(updateUser, {
+                data: { request: this._req }
+            });
+            return !!result;
+        } catch (err) {
+            this._logger.error(err);
+            return false;
+        }
+    }
+
+    public async getPagedList(
+        request: PaginationRequestDto
+    ): Promise<PaginationResponseDto<UserDto>> {
+        try {
+            const queryBuilder =
+                this._userRepository.createQueryBuilder('user');
+
+            if (request.filter) {
+                const filter = request.filter ? request.filter : '';
+                queryBuilder.andWhere([{ name: ILike(`%${filter}%`) }]);
+            }
+
+            const sortField: FindOptionsOrder<UserEntity> = {};
+            sortField[request.sortField] = request.order;
+
+            queryBuilder.skip(request.skip).take(request.take);
+            queryBuilder.orderBy(
+                request.sortField,
+                request.order === 'ASC' ? 'ASC' : 'DESC'
+            );
+
+            const [result, total] = await queryBuilder.getManyAndCount();
+            const customerDtos = this._mapper.mapArray(
+                result,
+                UserEntity,
+                UserDto
+            );
+            return {
+                data: customerDtos,
+                total
+            };
+        } catch (err) {
+            this._logger.error(err);
+            throw err;
+        }
+    }
+
+    public async getById(id: string): Promise<UserDto> {
+        try {
+            const user = await this._userRepository.findOneBy({ id });
+
+            if (!user) throw new NotFoundException('user_not_found');
+            return this._mapper.map(user, UserEntity, UserDto);
+        } catch (err) {
+            this._logger.error(err);
+            return null;
+        }
+    }
+}
