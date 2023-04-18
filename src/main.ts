@@ -2,7 +2,10 @@ import 'source-map-support/register';
 
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
-import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
+import {
+    ExpressAdapter,
+    NestExpressApplication
+} from '@nestjs/platform-express';
 import * as cors from 'cors';
 import { json } from 'express';
 import * as morgan from 'morgan'; // HTTP request logger
@@ -13,9 +16,14 @@ import { AppConfigService } from './shared/services/app-config.service';
 import { LoggerService } from './shared/services/logger.service';
 import { SharedModule } from './shared/shared.module';
 import { setupSwagger } from './shared/swagger/setup';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(), { cors: true });
+    const app = await NestFactory.create<NestExpressApplication>(
+        AppModule,
+        new ExpressAdapter(),
+        { cors: true }
+    );
     app.setGlobalPrefix('api');
 
     const loggerService = app.select(SharedModule).get(LoggerService);
@@ -25,9 +33,9 @@ async function bootstrap() {
             stream: {
                 write: (message) => {
                     loggerService.log(message);
-                },
-            },
-        }),
+                }
+            }
+        })
     );
 
     // app.use(helmet());
@@ -49,13 +57,13 @@ async function bootstrap() {
             // exceptionFactory: errors => new BadRequestException(errors),
             // dismissDefaultMessages: true,//TODO: disable in prod (if required)
             validationError: {
-                target: false,
-            },
-        }),
+                target: false
+            }
+        })
     );
 
     app.enableVersioning({
-        type: VersioningType.URI,
+        type: VersioningType.URI
     });
 
     app.use(json({ limit: '50mb' }));
@@ -77,7 +85,8 @@ async function bootstrap() {
         origin: origin,
         methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
         credentials: origin !== '*',
-        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue',
+        allowedHeaders:
+            'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue'
     };
     app.use(cors(corsOptions));
 
@@ -90,6 +99,14 @@ async function bootstrap() {
     // await redisIoAdapter.connectToRedis(redisOptions);
 
     // app.useWebSocketAdapter(redisIoAdapter);
+    const config = new DocumentBuilder()
+        .setTitle('Cats example')
+        .setDescription('The cats API description')
+        .setVersion('1.0')
+        .addTag('cats')
+        .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
 
     await app.listen(port, host);
 
