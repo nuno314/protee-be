@@ -39,7 +39,7 @@ export class AuthController extends BaseController {
     @ApiOperation({ summary: 'Login system-user by email and password' })
     @Post('system-user/login')
     @Version('1')
-    @UseGuards(RecaptchaGuard)
+    // @UseGuards(RecaptchaGuard)
     @HttpCode(HttpStatus.OK)
     public async loginSystemUser(@Body() request: SystemUserLoginDto): Promise<{ accessToken: string }> {
         return await this.authService.loginSystemUser(request.email, request.password);
