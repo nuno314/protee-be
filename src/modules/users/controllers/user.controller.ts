@@ -1,16 +1,5 @@
 /* eslint-disable simple-import-sort/imports */
-import {
-    Body,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Param,
-    Put,
-    Query,
-    UseGuards,
-    Version,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Put, Query, UseGuards, Version } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { BaseController } from '../../../common/base.controller';
@@ -71,7 +60,7 @@ export class UserController extends BaseController {
     @ApiOperation({ summary: 'Update profile' })
     @ApiResponse({
         status: HttpStatus.OK,
-        description: 'Update a profile',
+        description: 'Update a profile'
     })
     @Put('/profile')
     @Version('1')
@@ -83,16 +72,14 @@ export class UserController extends BaseController {
     @ApiOperation({ summary: 'Update a customer' })
     @ApiResponse({
         status: HttpStatus.OK,
-        description: 'Update customer',
+        description: 'Update customer'
     })
-    @Put('/user')
+    @Put('/')
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
     @Roles(RolesEnum.ADMIN)
-    public async updateUser(
-        @Body() body: UpdateUserDto,
-    ): Promise<boolean> {
+    public async updateUser(@Body() body: UpdateUserDto): Promise<boolean> {
         return await this._userService.update(body);
     }
 }

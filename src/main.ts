@@ -2,10 +2,8 @@ import 'source-map-support/register';
 
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
-import {
-    ExpressAdapter,
-    NestExpressApplication
-} from '@nestjs/platform-express';
+import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cors from 'cors';
 import { json } from 'express';
 import * as morgan from 'morgan'; // HTTP request logger
@@ -16,14 +14,9 @@ import { AppConfigService } from './shared/services/app-config.service';
 import { LoggerService } from './shared/services/logger.service';
 import { SharedModule } from './shared/shared.module';
 import { setupSwagger } from './shared/swagger/setup';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(
-        AppModule,
-        new ExpressAdapter(),
-        { cors: true }
-    );
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(), { cors: true });
     app.setGlobalPrefix('api');
 
     const loggerService = app.select(SharedModule).get(LoggerService);
@@ -85,8 +78,7 @@ async function bootstrap() {
         origin: origin,
         methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
         credentials: origin !== '*',
-        allowedHeaders:
-            'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue'
+        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue'
     };
     app.use(cors(corsOptions));
 
@@ -106,7 +98,7 @@ async function bootstrap() {
         .addTag('cats')
         .build();
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+    SwaggerModule.setup('', app, document);
 
     await app.listen(port, host);
 
