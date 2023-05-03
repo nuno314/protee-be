@@ -1,16 +1,17 @@
-import { InjectMapper } from '@automapper/nestjs';
 import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrder, ILike, Repository } from 'typeorm';
+
 import { PaginationRequestDto } from '../../../common/dto/pagination-request.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
 import { LoggerService } from '../../../shared/services/logger.service';
 import { UserDto } from '../dtos/domains/user.dto';
+import { UpdateAccountDto } from '../dtos/requests/update-account.dto';
 import { UpdateUserDto } from '../dtos/requests/update-user.dto';
 import { UserEntity } from '../entities/users.entity';
-import { UpdateAccountDto } from '../dtos/requests/update-account.dto';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +32,7 @@ export class UsersService {
 
         try {
             const result = await this._userRepository.save(updateUser, {
-                data: { request: this._req }
+                data: { request: this._req },
             });
             return !!result;
         } catch (err) {
@@ -39,10 +40,7 @@ export class UsersService {
             return false;
         }
     }
-    public async updateProfile(
-        userId: string,
-        dto: UpdateAccountDto
-    ): Promise<boolean> {
+    public async updateProfile(userId: string, dto: UpdateAccountDto): Promise<boolean> {
         const user = await this._userRepository.findOneBy({ id: userId });
 
         if (!user) throw new NotFoundException('user_not_found');
@@ -51,7 +49,7 @@ export class UsersService {
 
         try {
             const result = await this._userRepository.save(updateUser, {
-                data: { request: this._req }
+                data: { request: this._req },
             });
             return !!result;
         } catch (err) {
@@ -60,12 +58,9 @@ export class UsersService {
         }
     }
 
-    public async getPagedList(
-        request: PaginationRequestDto
-    ): Promise<PaginationResponseDto<UserDto>> {
+    public async getPagedList(request: PaginationRequestDto): Promise<PaginationResponseDto<UserDto>> {
         try {
-            const queryBuilder =
-                this._userRepository.createQueryBuilder('user');
+            const queryBuilder = this._userRepository.createQueryBuilder('user');
 
             if (request.filter) {
                 const filter = request.filter ? request.filter : '';
@@ -76,20 +71,13 @@ export class UsersService {
             sortField[request.sortField] = request.order;
 
             queryBuilder.skip(request.skip).take(request.take);
-            queryBuilder.orderBy(
-                request.sortField,
-                request.order === 'ASC' ? 'ASC' : 'DESC'
-            );
+            queryBuilder.orderBy(request.sortField, request.order === 'ASC' ? 'ASC' : 'DESC');
 
             const [result, total] = await queryBuilder.getManyAndCount();
-            const customerDtos = this._mapper.mapArray(
-                result,
-                UserEntity,
-                UserDto
-            );
+            const customerDtos = this._mapper.mapArray(result, UserEntity, UserDto);
             return {
                 data: customerDtos,
-                total
+                total,
             };
         } catch (err) {
             this._logger.error(err);
