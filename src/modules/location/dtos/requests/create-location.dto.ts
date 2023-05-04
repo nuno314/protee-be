@@ -1,6 +1,14 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
+import { LocationStatusEnum } from '../../enums/location-status.enum';
+
 export class CreateLocationDto {
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    status?: LocationStatusEnum;
+
     @IsNumber()
     @IsNotEmpty()
     long: number;
