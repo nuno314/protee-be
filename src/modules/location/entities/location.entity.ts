@@ -9,7 +9,7 @@ export class Location extends AbstractEntity {
     name: string;
 
     @Column()
-    status?: LocationStatusEnum;
+    status: LocationStatusEnum;
 
     @Column('decimal', { precision: 10, scale: 6 })
     lat: number;
