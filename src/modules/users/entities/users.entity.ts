@@ -1,9 +1,10 @@
 import { AutoMap } from '@automapper/classes';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import { AbstractEntity } from '../../../common/abstract.entity';
+import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
 
-@Entity({ synchronize: false, name: 'users' })
+@Entity({ synchronize: true, name: 'users' })
 export class UserEntity extends AbstractEntity {
     @Column({ nullable: true })
     @AutoMap()
@@ -28,4 +29,8 @@ export class UserEntity extends AbstractEntity {
     @AutoMap()
     @Column({ nullable: true })
     dob: Date;
+
+    @AutoMap()
+    @OneToMany(() => FamilyMemberEntity, (fm) => fm.user)
+    familyMembers?: FamilyMemberEntity[];
 }

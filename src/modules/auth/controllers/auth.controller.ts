@@ -1,12 +1,15 @@
-import { AuthService } from '../services/auth.service';
-import { BaseController } from '../../../common/base.controller';
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Version } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { FirebaseAuthGuard } from '../../../guards/firebase.guard';
+
+import { BaseController } from '../../../common/base.controller';
 import { User } from '../../../decorators/customer.decorator';
-import { SocialRegisterDto } from '../../users/dtos/requests/social-register.dto';
+import { FirebaseAuthGuard } from '../../../guards/firebase.guard';
 import { RecaptchaGuard } from '../../../guards/recaptcha.guard';
+import { SocialRegisterDto } from '../../users/dtos/requests/social-register.dto';
+import { ForgotPasswordDto } from '../dtos/requests/forgot-password.dto';
 import { SystemUserLoginDto } from '../dtos/requests/login.dto';
+import { ResetPasswordDto } from '../dtos/requests/reset-password.dto';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -29,10 +32,7 @@ export class AuthController extends BaseController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(FirebaseAuthGuard)
-    public async registerSocial(
-        @User() user,
-        @Body() request: SocialRegisterDto,
-    ): Promise<{ accessToken: string }> {
+    public async registerSocial(@User() user, @Body() request: SocialRegisterDto): Promise<{ accessToken: string }> {
         return await this.authService.socialLogin(user.uid, request.name);
     }
 
@@ -43,5 +43,22 @@ export class AuthController extends BaseController {
     @HttpCode(HttpStatus.OK)
     public async loginSystemUser(@Body() request: SystemUserLoginDto): Promise<{ accessToken: string }> {
         return await this.authService.loginSystemUser(request.email, request.password);
+    }
+
+    @ApiOperation({ summary: 'Admin request reset password' })
+    @Post('system-user/request-reset-password')
+    @Version('1')
+    @UseGuards(RecaptchaGuard)
+    @HttpCode(HttpStatus.OK)
+    public async userRequestAdminResetPassword(@Body() request: ForgotPasswordDto): Promise<boolean> {
+        return await this.authService.adminRequestResetPassword(request);
+    }
+
+    @ApiOperation({ summary: 'Admin reset password' })
+    @Post('system-user/reset-password')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    public async userResetAdminPassword(@Body() request: ResetPasswordDto): Promise<boolean> {
+        return await this.authService.adminResetPassword(request);
     }
 }
