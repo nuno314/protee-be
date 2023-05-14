@@ -48,7 +48,7 @@ export class AuthController extends BaseController {
     @ApiOperation({ summary: 'Admin request reset password' })
     @Post('system-user/request-reset-password')
     @Version('1')
-    @UseGuards(RecaptchaGuard)
+    // @UseGuards(RecaptchaGuard)
     @HttpCode(HttpStatus.OK)
     public async userRequestAdminResetPassword(@Body() request: ForgotPasswordDto): Promise<boolean> {
         return await this.authService.adminRequestResetPassword(request);

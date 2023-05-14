@@ -111,7 +111,7 @@ export class AppConfigService {
                         winston.format.timestamp({
                             format: 'DD-MM-YYYY HH:mm:ss',
                         }),
-                        winston.format.simple(),
+                        winston.format.simple()
                     ),
                 }),
             ],
@@ -311,5 +311,16 @@ export class AppConfigService {
             token: this.get('SMS_STRINGEE_TOKEN') || '',
             from: this.get('SMS_FROM') || '',
         };
+    }
+
+    get gcpServiceAccount(): unknown {
+        const accountFile = this.get('GCP_SERVICE_ACCOUNT') || './gcloud/protee-dev.json';
+        if (!accountFile) return {};
+
+        try {
+            return JSON.parse(readFileSync(accountFile, 'utf8'));
+        } catch (err) {
+            return {};
+        }
     }
 }

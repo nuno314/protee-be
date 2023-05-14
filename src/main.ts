@@ -6,6 +6,7 @@ import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cors from 'cors';
 import { json } from 'express';
+import admin from 'firebase-admin';
 import * as morgan from 'morgan'; // HTTP request logger
 
 import { AppModule } from './app.module';
@@ -16,6 +17,13 @@ import { SharedModule } from './shared/shared.module';
 import { setupSwagger } from './shared/swagger/setup';
 
 async function bootstrap() {
+    const serviceAccount = new AppConfigService().gcpServiceAccount;
+    admin.initializeApp({
+        projectId: serviceAccount['projectId'],
+        credential: admin.credential.cert(serviceAccount),
+    });
+    admin.firestore().settings({ ignoreUndefinedProperties: true });
+
     const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(), { cors: true });
     app.setGlobalPrefix('api');
 
@@ -26,8 +34,8 @@ async function bootstrap() {
             stream: {
                 write: (message) => {
                     loggerService.log(message);
-                }
-            }
+                },
+            },
         })
     );
 
@@ -50,13 +58,13 @@ async function bootstrap() {
             // exceptionFactory: errors => new BadRequestException(errors),
             // dismissDefaultMessages: true,//TODO: disable in prod (if required)
             validationError: {
-                target: false
-            }
+                target: false,
+            },
         })
     );
 
     app.enableVersioning({
-        type: VersioningType.URI
+        type: VersioningType.URI,
     });
 
     app.use(json({ limit: '50mb' }));
@@ -78,7 +86,7 @@ async function bootstrap() {
         origin: origin,
         methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
         credentials: origin !== '*',
-        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue'
+        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue',
     };
     app.use(cors(corsOptions));
 
