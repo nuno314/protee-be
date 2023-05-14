@@ -4,11 +4,11 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ExpressAdapter, NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cors from 'cors';
+// import * as cors from 'cors';
 import { json } from 'express';
 import admin from 'firebase-admin';
-import * as morgan from 'morgan'; // HTTP request logger
 
+// import * as morgan from 'morgan'; // HTTP request logger
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { AppConfigService } from './shared/services/app-config.service';
@@ -29,15 +29,15 @@ async function bootstrap() {
 
     const loggerService = app.select(SharedModule).get(LoggerService);
     app.useLogger(loggerService);
-    app.use(
-        morgan('combined', {
-            stream: {
-                write: (message) => {
-                    loggerService.log(message);
-                },
-            },
-        })
-    );
+    // app.use(
+    //     morgan('combined', {
+    //         stream: {
+    //             write: (message) => {
+    //                 loggerService.log(message);
+    //             },
+    //         },
+    //     })
+    // );
 
     // app.use(helmet());
     // app.use(
@@ -82,13 +82,13 @@ async function bootstrap() {
     const port = configService.getNumber('PORT') || 3000;
     const host = configService.get('HOST') || '0.0.0.0';
     const origin = configService.get('ORIGIN') || '*';
-    const corsOptions = {
-        origin: origin,
-        methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
-        credentials: origin !== '*',
-        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue',
-    };
-    app.use(cors(corsOptions));
+    // const corsOptions = {
+    //     origin: origin,
+    //     methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
+    //     credentials: origin !== '*',
+    //     allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue',
+    // };
+    // app.use(cors(corsOptions));
 
     // const redisIoAdapter = new RedisIoAdapter(app);
     // const redisOptions: RedisClientOptions = {
