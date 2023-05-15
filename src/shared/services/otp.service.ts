@@ -6,17 +6,12 @@ import * as speakeasy from 'speakeasy';
 import { OTP_CONTENT } from '../../constant';
 import { AppConfigService } from './app-config.service';
 import { BaseHttpService } from './base-http.service';
-import { LoggerService } from './logger.service';
 
 @Injectable()
 export class OtpService {
     static time = 1453853945;
 
-    constructor(
-        private readonly _httpService: BaseHttpService,
-        private readonly _logger: LoggerService,
-        private readonly _configService: AppConfigService,
-    ) {}
+    constructor(private readonly _httpService: BaseHttpService, private readonly _configService: AppConfigService) {}
 
     public static getOtpWindow(): number {
         return Number(process.env['APP_OTP_EXPIRED_IN']) / Number(process.env['SPEAKEASY_OTP_STEP']);

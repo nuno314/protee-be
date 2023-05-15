@@ -2,32 +2,21 @@ import { classes } from '@automapper/classes';
 import { AutomapperModule } from '@automapper/nestjs';
 import { HttpModule } from '@nestjs/axios';
 import { forwardRef, Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import * as path from 'path';
 
 import { CustomerProvider } from '../decorators/customer.factory';
 import { AppConfigService } from './services/app-config.service';
 import { BaseHttpService } from './services/base-http.service';
-import { LoggerService } from './services/logger.service';
 import { MailService } from './services/mail.service';
 import { OtpService } from './services/otp.service';
 import { S3Service } from './services/s3.service';
 import { UtilsService } from './services/utils.service';
 import { ValidatorService } from './services/validator.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as path from 'path';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
-const providers = [
-    CustomerProvider,
-    AppConfigService,
-    LoggerService,
-    ValidatorService,
-    UtilsService,
-    MailService,
-    BaseHttpService,
-    S3Service,
-    OtpService,
-];
+const providers = [CustomerProvider, AppConfigService, ValidatorService, UtilsService, MailService, BaseHttpService, S3Service, OtpService];
 
 @Global()
 @Module({

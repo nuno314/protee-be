@@ -7,7 +7,6 @@ import { FindOptionsOrder, ILike, Repository } from 'typeorm';
 
 import { PaginationLocationDto } from '../../../common/dto/pagination-location.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
-import { LoggerService } from '../../../shared/services/logger.service';
 import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
@@ -20,8 +19,7 @@ export class LocationService {
         @Inject(REQUEST) private readonly _req,
         @InjectRepository(Location)
         private readonly _locationRepository: Repository<Location>,
-        @InjectMapper() private readonly _mapper: Mapper,
-        private readonly _logger: LoggerService
+        @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
     async create(createLocationDto: CreateLocationDto): Promise<Location> {
@@ -49,7 +47,7 @@ export class LocationService {
             const result = await queryBuilder.getMany();
             return result;
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             throw err;
         }
     }
@@ -67,7 +65,7 @@ export class LocationService {
             });
             return !!result;
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             return false;
         }
     }

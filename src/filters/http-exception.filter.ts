@@ -1,11 +1,10 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { LoggerService } from '../shared/services/logger.service';
-
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-    constructor(private readonly _logger: LoggerService) {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    constructor() {}
 
     catch(exception: HttpException, host: ArgumentsHost) {
         //TODO: Need to remove custom handler here
@@ -25,9 +24,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
             };
 
             if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
-                this._logger.error(`${request.method} ${request.url}`, exception.stack, 'ExceptionFilter');
+                console.log(`${request.method} ${request.url}`, exception.stack, 'ExceptionFilter');
             } else {
-                this._logger.error(`${request.method} ${request.url}`, JSON.stringify(errorResponse), 'ExceptionFilter');
+                console.log(`${request.method} ${request.url}`, JSON.stringify(errorResponse), 'ExceptionFilter');
             }
 
             return response.status(status).json(errorResponse);

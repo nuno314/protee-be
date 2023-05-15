@@ -5,7 +5,6 @@ import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 
-import { LoggerService } from '../../../shared/services/logger.service';
 import { UtilsService } from '../../../shared/services/utils.service';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
@@ -26,8 +25,7 @@ export class FamilyService {
         private readonly _userRepository: Repository<UserEntity>,
         @InjectRepository(FamilyInviteCodeEntity)
         private readonly _familyInviteCodeRepository: Repository<FamilyInviteCodeEntity>,
-        @InjectMapper() private readonly _mapper: Mapper,
-        private readonly _logger: LoggerService
+        @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
     public async approveJoinFamily(): Promise<boolean> {
@@ -78,7 +76,7 @@ export class FamilyService {
                 return createInviteCodeResult.code;
             }
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             return null;
         }
     }
@@ -100,7 +98,7 @@ export class FamilyService {
             const createMemberResult = await this._familyMemberRepository.save(member);
             return !!createMemberResult;
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             return false;
         }
     }

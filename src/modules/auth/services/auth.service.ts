@@ -5,7 +5,6 @@ import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 
 import { AppConfigService } from '../../../shared/services/app-config.service';
-import { LoggerService } from '../../../shared/services/logger.service';
 import { MailService } from '../../../shared/services/mail.service';
 import { OtpService } from '../../../shared/services/otp.service';
 import { UtilsService } from '../../../shared/services/utils.service';
@@ -25,7 +24,6 @@ export class AuthService {
         @InjectRepository(ResetPasswordRequestEntity)
         private readonly _resetPasswordRequestRepository: Repository<ResetPasswordRequestEntity>,
         private readonly jwtService: JwtService,
-        private readonly _logger: LoggerService,
         private readonly _configService: AppConfigService,
         private readonly _mailService: MailService
     ) {}
@@ -60,7 +58,7 @@ export class AuthService {
 
             return { accessToken: this.jwtService.sign(payload) };
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             throw err;
         }
     }
@@ -123,7 +121,7 @@ export class AuthService {
             this._mailService.sendResetPassword(user.email, url);
             return true;
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             throw err;
         }
     }
@@ -152,7 +150,7 @@ export class AuthService {
             await this._resetPasswordRequestRepository.save(request);
             return await this._updateAdminPassword(request.userId, dto.newPassword);
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             throw err;
         }
     }

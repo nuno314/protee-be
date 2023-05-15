@@ -11,11 +11,10 @@ import { readFileSync } from 'fs';
 
 // import * as morgan from 'morgan'; // HTTP request logger
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { setupSwagger } from './shared/swagger/setup';
 
 async function bootstrap() {
-    const accountFile = this.get('GCP_SERVICE_ACCOUNT') || './gcloud/protee-dev.json';
+    const accountFile = process.env.GCP_SERVICE_ACCOUNT || './gcloud/protee-dev.json';
     if (accountFile) {
         try {
             const serviceAccount = JSON.parse(readFileSync(accountFile, 'utf8'));

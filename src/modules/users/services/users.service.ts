@@ -7,7 +7,6 @@ import { FindOptionsOrder, ILike, Repository } from 'typeorm';
 
 import { PaginationRequestDto } from '../../../common/dto/pagination-request.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
-import { LoggerService } from '../../../shared/services/logger.service';
 import { UserDto } from '../dtos/domains/user.dto';
 import { UpdateAccountDto } from '../dtos/requests/update-account.dto';
 import { UpdateUserDto } from '../dtos/requests/update-user.dto';
@@ -19,8 +18,7 @@ export class UsersService {
         @Inject(REQUEST) private readonly _req,
         @InjectRepository(UserEntity)
         private readonly _userRepository: Repository<UserEntity>,
-        @InjectMapper() private readonly _mapper: Mapper,
-        private readonly _logger: LoggerService
+        @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
     public async update(dto: UpdateUserDto): Promise<boolean> {
@@ -36,7 +34,7 @@ export class UsersService {
             });
             return !!result;
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             return false;
         }
     }
@@ -53,7 +51,7 @@ export class UsersService {
             });
             return !!result;
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             return false;
         }
     }
@@ -80,7 +78,7 @@ export class UsersService {
                 total,
             };
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             throw err;
         }
     }
@@ -92,7 +90,7 @@ export class UsersService {
             if (!user) throw new NotFoundException('user_not_found');
             return this._mapper.map(user, UserEntity, UserDto);
         } catch (err) {
-            this._logger.error(err);
+            console.log(err);
             return null;
         }
     }

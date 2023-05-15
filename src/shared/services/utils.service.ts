@@ -3,11 +3,10 @@ import * as bcrypt from 'bcryptjs';
 import * as _ from 'lodash';
 
 import { AppConfigService } from './app-config.service';
-import { LoggerService } from './logger.service';
 
 @Injectable()
 export class UtilsService {
-    constructor(private readonly _configService: AppConfigService, private readonly _logger: LoggerService) {}
+    constructor(private readonly _configService: AppConfigService) {}
 
     static removeVietnameseTones = (str: string): string => {
         const newStr = str
@@ -106,7 +105,7 @@ export class UtilsService {
                 str.push(
                     v !== null && typeof v === 'object'
                         ? this.serializeQueryString(v, k)
-                        : encodeURIComponent(k) + '=' + encodeURIComponent(v),
+                        : encodeURIComponent(k) + '=' + encodeURIComponent(v)
                 );
             }
         }
