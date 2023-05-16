@@ -14,18 +14,18 @@ import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { setupSwagger } from './shared/swagger/setup';
 
 async function bootstrap() {
-    const accountFile = process.env.GCP_SERVICE_ACCOUNT || './gcloud/protee-dev.json';
-    if (accountFile) {
-        try {
-            const serviceAccount = JSON.parse(readFileSync(accountFile, 'utf8'));
-            admin.initializeApp({
-                projectId: serviceAccount['projectId'],
-                credential: admin.credential.cert(serviceAccount),
-            });
-            admin.firestore().settings({ ignoreUndefinedProperties: true });
-            // eslint-disable-next-line no-empty
-        } catch (err) {}
-    }
+    // const accountFile = process.env.GCP_SERVICE_ACCOUNT || './gcloud/protee-dev.json';
+    // if (accountFile) {
+    //     try {
+    //         const serviceAccount = JSON.parse(readFileSync(accountFile, 'utf8'));
+    //         admin.initializeApp({
+    //             projectId: serviceAccount['projectId'],
+    //             credential: admin.credential.cert(serviceAccount),
+    //         });
+    //         admin.firestore().settings({ ignoreUndefinedProperties: true });
+    //         // eslint-disable-next-line no-empty
+    //     } catch (err) {}
+    // }
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api');
 
