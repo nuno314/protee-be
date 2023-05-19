@@ -11,6 +11,7 @@ import { INVITE_CODE_LENGTH } from '../constant/family.constant';
 import { FamilyEntity } from '../entities/family.entity';
 import { FamilyInviteCodeEntity } from '../entities/family-invite-code.entity';
 import { FamilyMemberEntity } from '../entities/family-member.entity';
+import { JoinFamilyRequestEntity } from '../entities/join-family-request.entity';
 import { FamilyRoleEnum } from '../enums/family-role.enum';
 
 @Injectable()
@@ -25,11 +26,30 @@ export class FamilyService {
         private readonly _userRepository: Repository<UserEntity>,
         @InjectRepository(FamilyInviteCodeEntity)
         private readonly _familyInviteCodeRepository: Repository<FamilyInviteCodeEntity>,
+        @InjectRepository(JoinFamilyRequestEntity)
+        private readonly _joinFamilyRequestRepository: Repository<JoinFamilyRequestEntity>,
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
-    public async approveJoinFamily(): Promise<boolean> {
-        return true;
+    public async approveJoinFamily(requestId: string): Promise<boolean> {
+        const request = await this._joinFamilyRequestRepository.findOneBy({ id: requestId });
+
+        if (!request) throw new NotFoundException('request_not_found');
+
+        try {
+            const member: FamilyMemberEntity = {
+                familyId: request.familyId,
+                userId: request.createdBy,
+                role: FamilyRoleEnum.Child,
+            };
+
+            const createMemberResult = await this._familyMemberRepository.save(member);
+            await this._joinFamilyRequestRepository.softRemove(request);
+            return !!createMemberResult;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
     }
 
     public async getFamilyInviteCode(): Promise<string> {
@@ -89,14 +109,13 @@ export class FamilyService {
         if (!invideCodeEntity) throw new BadRequestException('invalid_code');
 
         try {
-            const member: FamilyMemberEntity = {
+            const request: JoinFamilyRequestEntity = {
                 familyId: invideCodeEntity.familyId,
-                userId: this._req?.user?.id,
-                role: FamilyRoleEnum.Child,
+                isApproved: false,
             };
 
-            const createMemberResult = await this._familyMemberRepository.save(member);
-            return !!createMemberResult;
+            const createRequestResult = await this._joinFamilyRequestRepository.save(request, { data: { request: this._req } });
+            return !!createRequestResult;
         } catch (err) {
             console.log(err);
             return false;
