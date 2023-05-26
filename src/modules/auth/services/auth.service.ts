@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -27,6 +27,31 @@ export class AuthService {
         private readonly _configService: AppConfigService,
         private readonly _mailService: MailService
     ) {}
+
+    // For test only
+    public async loginById(id: string): Promise<{ accessToken: string }> {
+        try {
+            const user = await this._userRepository.findOneBy({
+                id,
+            });
+
+            if (!user) {
+                throw new NotFoundException('user_not_found');
+            }
+
+            const payload = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+            };
+
+            return { accessToken: this.jwtService.sign(payload) };
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    }
     public async socialLogin(firebaseId: string, name?: string): Promise<{ accessToken: string }> {
         try {
             const userExist = await this._userRepository.findOneBy({
