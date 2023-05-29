@@ -153,7 +153,7 @@ export class FamilyService {
 
         if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
 
-        const needToDeleteMember = await this._familyMemberRepository.findOneBy({ userId: memberId, familyId: requestMember.familyId });
+        const needToDeleteMember = await this._familyMemberRepository.findOneBy({ id: memberId, familyId: requestMember.familyId });
 
         if (!needToDeleteMember) throw new NotFoundException('member_not_found');
 
