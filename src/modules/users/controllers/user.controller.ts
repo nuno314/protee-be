@@ -60,7 +60,7 @@ export class UserController extends BaseController {
     @ApiOperation({ summary: 'Update profile' })
     @ApiResponse({
         status: HttpStatus.OK,
-        description: 'Update a profile'
+        description: 'Update a profile',
     })
     @Put('/profile')
     @Version('1')
@@ -72,7 +72,7 @@ export class UserController extends BaseController {
     @ApiOperation({ summary: 'Update a customer' })
     @ApiResponse({
         status: HttpStatus.OK,
-        description: 'Update customer'
+        description: 'Update customer',
     })
     @Put('/')
     @Version('1')

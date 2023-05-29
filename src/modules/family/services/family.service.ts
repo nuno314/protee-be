@@ -31,6 +31,13 @@ export class FamilyService {
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
+    public async getFamilyByUserId(userId: string): Promise<FamilyEntity> {
+        const memberData = await this._familyMemberRepository.findOneBy({ userId });
+        if (!memberData) throw new BadRequestException('user_is_not_a_family_member');
+
+        return await this._familyRepository.findOneBy({ id: memberData.familyId });
+    }
+
     public async approveJoinFamily(requestId: string): Promise<boolean> {
         const request = await this._joinFamilyRequestRepository.findOneBy({ id: requestId });
 
@@ -43,7 +50,7 @@ export class FamilyService {
                 role: FamilyRoleEnum.Child,
             };
 
-            const createMemberResult = await this._familyMemberRepository.save(member);
+            const createMemberResult = await this._familyMemberRepository.save(member, { data: { request: this._req } });
             await this._joinFamilyRequestRepository.softRemove(request);
             return !!createMemberResult;
         } catch (err) {

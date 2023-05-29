@@ -1,26 +1,20 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { AbstractEntity } from '../../../common/abstract.entity';
-import { ConversationEntity } from '../../conversation/entities/conversation.entity';
+import { FamilyEntity } from '../../family/entities/family.entity';
 
-@Entity({ synchronize: false, name: 'message' })
+@Entity({ synchronize: true, name: 'message' })
 export class MessageEntity extends AbstractEntity {
-    @Column({ type: 'uuid' })
-    sender: string;
-
-    @Column({ type: 'uuid' })
-    receiver: string;
-
-    @Column({ nullable: true, default: false })
-    isSeen: boolean;
+    @Column({ type: 'simple-array', nullable: true })
+    seenBy: string[];
 
     @Column()
     content: string;
 
     @Column({ type: 'uuid' })
-    conversation_id: string;
+    familyId: string;
 
-    @ManyToOne(() => ConversationEntity, (conversation) => conversation.message)
-    @JoinColumn({ name: 'conversation_id' })
-    chat: ConversationEntity;
+    @ManyToOne(() => FamilyEntity, (conversation) => conversation.messages)
+    @JoinColumn({ name: 'family_id' })
+    family?: FamilyEntity;
 }
