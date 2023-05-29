@@ -39,7 +39,8 @@ async function bootstrap() {
         origin: origin,
         methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
         credentials: origin !== '*',
-        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue',
+        allowedHeaders:
+            'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
     };
     app.use(cors(corsOptions));
 
