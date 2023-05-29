@@ -3,29 +3,14 @@ import 'source-map-support/register';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-// import * as cors from 'cors';
+import cors from 'cors';
 import { json } from 'express';
-import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
 
-// import * as morgan from 'morgan'; // HTTP request logger
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { setupSwagger } from './shared/swagger/setup';
 
 async function bootstrap() {
-    // const accountFile = process.env.GCP_SERVICE_ACCOUNT || './gcloud/protee-dev.json';
-    // if (accountFile) {
-    //     try {
-    //         const serviceAccount = JSON.parse(readFileSync(accountFile, 'utf8'));
-    //         admin.initializeApp({
-    //             projectId: serviceAccount['projectId'],
-    //             credential: admin.credential.cert(serviceAccount),
-    //         });
-    //         admin.firestore().settings({ ignoreUndefinedProperties: true });
-    //         // eslint-disable-next-line no-empty
-    //     } catch (err) {}
-    // }
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api');
 
@@ -49,6 +34,14 @@ async function bootstrap() {
             res.json(document);
         });
     }
+    const origin = process.env.ORIGIN || '*';
+    const corsOptions = {
+        origin: origin,
+        methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
+        credentials: origin !== '*',
+        allowedHeaders: 'Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN, secret, recaptchavalue',
+    };
+    app.use(cors(corsOptions));
 
     const port = Number(process.env.PORT) || 3000;
     const host = process.env.HOST || '0.0.0.0';
