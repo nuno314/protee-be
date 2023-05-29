@@ -26,6 +26,13 @@ export class AuthController extends BaseController {
     public async loginSocial(@User() user): Promise<{ accessToken: string }> {
         return await this.authService.socialLogin(user.uid);
     }
+    @ApiOperation({ summary: 'Test Only' })
+    @Post('user/fake-login')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    public async fakeLogin(@Body() body: { id: string }): Promise<{ accessToken: string }> {
+        return await this.authService.loginById(body.id);
+    }
 
     @ApiOperation({ summary: 'Register social user by facebook or google' })
     @Post('user/social-register')
