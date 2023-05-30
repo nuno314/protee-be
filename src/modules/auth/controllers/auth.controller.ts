@@ -39,8 +39,8 @@ export class AuthController extends BaseController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(FirebaseAuthGuard)
-    public async registerSocial(@User() user, @Body() request: SocialRegisterDto): Promise<{ accessToken: string }> {
-        return await this.authService.socialLogin(user.uid, request.name);
+    public async registerSocial(@User() user): Promise<{ accessToken: string }> {
+        return await this.authService.socialLogin(user.uid, user.name);
     }
 
     @ApiOperation({ summary: 'Login system-user by email and password' })
