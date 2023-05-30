@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cors from 'cors';
+// import * as cors from 'cors';
 import { json } from 'express';
 
 import { AppModule } from './app.module';
@@ -34,15 +34,15 @@ async function bootstrap() {
             res.json(document);
         });
     }
-    const origin = process.env.ORIGIN || '*';
-    const corsOptions = {
-        origin: origin,
-        methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
-        credentials: origin !== '*',
-        allowedHeaders:
-            'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
-    };
-    app.use(cors(corsOptions));
+    // const origin = process.env.ORIGIN || '*';
+    // const corsOptions = {
+    //     origin: origin,
+    //     methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
+    //     credentials: origin !== '*',
+    //     allowedHeaders:
+    //         'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
+    // };
+    // app.use(cors(corsOptions));
 
     const port = Number(process.env.PORT) || 3000;
     const host = process.env.HOST || '0.0.0.0';
