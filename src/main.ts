@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cors from 'cors';
+import * as cors from 'cors';
 import { json } from 'express';
 
 import { AppModule } from './app.module';
