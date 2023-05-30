@@ -6,7 +6,7 @@
     "private": true,
     "license": "UNLICENSED",
     "engines": {
-        "node": "14.x"
+        "node": "18.x"
     },
     "scripts": {
         "build": "rimraf dist && tsc -p tsconfig.build.json && nest build",
