@@ -1,3 +1,5 @@
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +11,7 @@ import { MailService } from '../../../shared/services/mail.service';
 import { OtpService } from '../../../shared/services/otp.service';
 import { UtilsService } from '../../../shared/services/utils.service';
 import { SystemUserEntity } from '../../system-users/entities/system-users.entity';
+import { UserDto } from '../../users/dtos/domains/user.dto';
 import { UserEntity } from '../../users/entities/users.entity';
 import { ForgotPasswordDto } from '../dtos/requests/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/requests/reset-password.dto';
@@ -25,7 +28,8 @@ export class AuthService {
         private readonly _resetPasswordRequestRepository: Repository<ResetPasswordRequestEntity>,
         private readonly jwtService: JwtService,
         private readonly _configService: AppConfigService,
-        private readonly _mailService: MailService
+        private readonly _mailService: MailService,
+        @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
     // For test only
@@ -52,7 +56,7 @@ export class AuthService {
             throw err;
         }
     }
-    public async socialLogin(firebaseId: string, name?: string): Promise<{ accessToken: string }> {
+    public async socialLogin(firebaseId: string, name?: string): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
         try {
             const userExist = await this._userRepository.findOneBy({
                 firebaseId: firebaseId,
@@ -81,7 +85,11 @@ export class AuthService {
                 phoneNumber: user.phoneNumber,
             };
 
-            return { accessToken: this.jwtService.sign(payload) };
+            return {
+                accessToken: this.jwtService.sign(payload),
+                refreshToken: this.jwtService.sign(payload, { expiresIn: '30d' }),
+                user: this._mapper.map(user, UserEntity, UserDto),
+            };
         } catch (err) {
             console.log(err);
             throw err;

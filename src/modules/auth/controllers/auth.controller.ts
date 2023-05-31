@@ -5,6 +5,7 @@ import { BaseController } from '../../../common/base.controller';
 import { User } from '../../../decorators/customer.decorator';
 import { FirebaseAuthGuard } from '../../../guards/firebase.guard';
 import { RecaptchaGuard } from '../../../guards/recaptcha.guard';
+import { UserDto } from '../../users/dtos/domains/user.dto';
 import { SocialRegisterDto } from '../../users/dtos/requests/social-register.dto';
 import { ForgotPasswordDto } from '../dtos/requests/forgot-password.dto';
 import { SystemUserLoginDto } from '../dtos/requests/login.dto';
@@ -39,7 +40,7 @@ export class AuthController extends BaseController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(FirebaseAuthGuard)
-    public async registerSocial(@User() user): Promise<{ accessToken: string }> {
+    public async registerSocial(@User() user): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
         return await this.authService.socialLogin(user.uid, user.name);
     }
 
