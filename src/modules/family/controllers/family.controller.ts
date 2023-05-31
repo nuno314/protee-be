@@ -13,13 +13,13 @@ export class FamilyController extends BaseController {
     constructor(private readonly _familyService: FamilyService) {
         super();
     }
-    @ApiOperation({ summary: 'Get family profile' })
-    @Get('/profile')
-    @Version('1')
-    @HttpCode(HttpStatus.OK)
-    async getFamilyProfile() {
-        return await this._familyService.getFamilyProfile();
-    }
+    // @ApiOperation({ summary: 'Get family profile' })
+    // @Get('/profile')
+    // @Version('1')
+    // @HttpCode(HttpStatus.OK)
+    // async getFamilyProfile() {
+    //     return await this._familyService.getFamilyProfile();
+    // }
 
     @ApiOperation({ summary: 'Get family members' })
     @Get('/members')
