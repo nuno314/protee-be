@@ -22,7 +22,7 @@ export class FamilyController extends BaseController {
     }
 
     @ApiOperation({ summary: 'Get family members' })
-    @Get('/profile')
+    @Get('/members')
     @Version('1')
     @HttpCode(HttpStatus.OK)
     async getFamilyMembers() {
@@ -30,7 +30,7 @@ export class FamilyController extends BaseController {
     }
 
     @ApiOperation({ summary: 'Get join family requests' })
-    @Get('/invite-code')
+    @Get('/join-requests')
     @Version('1')
     @HttpCode(HttpStatus.OK)
     async getJoinRequest() {
