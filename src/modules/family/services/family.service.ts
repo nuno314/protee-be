@@ -31,6 +31,57 @@ export class FamilyService {
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
+    public async getFamilyProfile(): Promise<FamilyEntity> {
+        if (!this._req?.user?.id) {
+            throw new UnauthorizedException();
+        }
+        const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
+        if (!user) throw new UnauthorizedException();
+
+        const member = await this._familyMemberRepository.findOneBy({ userId: user.id });
+
+        if (!member) throw new BadRequestException('user_not_a_family_member');
+
+        return await this._familyRepository.findOneBy({ id: member.familyId });
+    }
+
+    public async getFamilyMembers(): Promise<FamilyMemberEntity[]> {
+        if (!this._req?.user?.id) {
+            throw new UnauthorizedException();
+        }
+        const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
+        if (!user) throw new UnauthorizedException();
+
+        const member = await this._familyMemberRepository.findOneBy({ userId: user.id });
+
+        if (!member) throw new BadRequestException('user_not_a_family_member');
+
+        const members = await this._familyMemberRepository.find({
+            where: { familyId: member.familyId, userId: Not(user.id) },
+            select: { userId: true },
+            relations: {
+                user: true,
+            },
+        });
+        return members;
+    }
+
+    public async getJoinRequest(): Promise<JoinFamilyRequestEntity[]> {
+        if (!this._req?.user?.id) {
+            throw new UnauthorizedException();
+        }
+
+        const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
+        if (!user) throw new UnauthorizedException();
+
+        const member = await this._familyMemberRepository.findOneBy({ userId: user.id });
+
+        if (!member) throw new BadRequestException('user_not_a_family_member');
+
+        if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_get_request');
+        return await this._joinFamilyRequestRepository.findBy({ familyId: member.familyId });
+    }
+
     public async getFamilyByUserId(userId: string): Promise<FamilyEntity> {
         const memberData = await this._familyMemberRepository.findOneBy({ userId });
         if (!memberData) throw new BadRequestException('user_is_not_a_family_member');
@@ -114,6 +165,21 @@ export class FamilyService {
         const invideCodeEntity = await this._familyInviteCodeRepository.findOneBy({ code });
 
         if (!invideCodeEntity) throw new BadRequestException('invalid_code');
+
+        const memberEntity = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
+
+        if (memberEntity) {
+            const numberMemberOfCurrentFamily = await this._familyMemberRepository.countBy({ familyId: memberEntity.familyId });
+            if (numberMemberOfCurrentFamily > 1) throw new BadRequestException('user_joined_other_family');
+
+            if (memberEntity.role === FamilyRoleEnum.Parent) {
+                const numberRequestJoin = await this._joinFamilyRequestRepository.countBy({ familyId: memberEntity.familyId });
+                if (numberRequestJoin > 0) throw new BadRequestException('current_family_has_waiting_join_request');
+            }
+
+            await this._familyMemberRepository.softRemove(memberEntity);
+            await this._familyRepository.softRemove({ id: memberEntity.familyId });
+        }
 
         try {
             const request: JoinFamilyRequestEntity = {
