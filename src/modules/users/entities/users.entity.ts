@@ -3,6 +3,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
+import { JoinFamilyRequestEntity } from '../../family/entities/join-family-request.entity';
 
 @Entity({ synchronize: true, name: 'users' })
 export class UserEntity extends AbstractEntity {
@@ -33,4 +34,8 @@ export class UserEntity extends AbstractEntity {
     @AutoMap()
     @OneToMany(() => FamilyMemberEntity, (fm) => fm.user)
     familyMembers?: FamilyMemberEntity[];
+
+    @AutoMap()
+    @OneToMany(() => JoinFamilyRequestEntity, (fm) => fm.user)
+    joinRequests?: JoinFamilyRequestEntity[];
 }

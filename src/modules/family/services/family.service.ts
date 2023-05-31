@@ -31,6 +31,23 @@ export class FamilyService {
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
+    public async removeJoinRequest(requestId: string): Promise<boolean> {
+        if (!requestId) throw new BadRequestException('id_is_required');
+
+        const request = await this._joinFamilyRequestRepository.findOneBy({ id: requestId });
+
+        if (!request) throw new NotFoundException('request_not_found');
+
+        const member = await this._familyMemberRepository.findOneBy({ userId: this._req.user.id });
+
+        if (!member) throw new BadRequestException('user_not_a_family_member');
+
+        if (member.familyId !== request.familyId) throw new ForbiddenException('not_same_family');
+        if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_remove_join_request');
+
+        return !!(await this._joinFamilyRequestRepository.softRemove(request, { data: { request: this._req } }));
+    }
+
     public async getFamilyProfile(): Promise<FamilyEntity> {
         if (!this._req?.user?.id) {
             throw new UnauthorizedException();
@@ -79,7 +96,14 @@ export class FamilyService {
         if (!member) throw new BadRequestException('user_not_a_family_member');
 
         if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_get_request');
-        return await this._joinFamilyRequestRepository.findBy({ familyId: member.familyId });
+        const request = await this._joinFamilyRequestRepository.find({
+            where: { familyId: member.familyId },
+            select: { createdBy: true },
+            relations: {
+                user: true,
+            },
+        });
+        return request;
     }
 
     public async getFamilyByUserId(userId: string): Promise<FamilyEntity> {
@@ -93,6 +117,13 @@ export class FamilyService {
         const request = await this._joinFamilyRequestRepository.findOneBy({ id: requestId });
 
         if (!request) throw new NotFoundException('request_not_found');
+
+        const member = await this._familyMemberRepository.findOneBy({ userId: this._req.user.id });
+
+        if (!member) throw new BadRequestException('user_not_a_family_member');
+
+        if (member.familyId !== request.familyId) throw new ForbiddenException('not_same_family');
+        if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_approve_join_request');
 
         try {
             const member: FamilyMemberEntity = {
