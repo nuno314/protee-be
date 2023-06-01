@@ -1,12 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Version } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { BaseController } from '../../../common/base.controller';
 import { User } from '../../../decorators/customer.decorator';
 import { FirebaseAuthGuard } from '../../../guards/firebase.guard';
-import { RecaptchaGuard } from '../../../guards/recaptcha.guard';
+import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { UserDto } from '../../users/dtos/domains/user.dto';
-import { SocialRegisterDto } from '../../users/dtos/requests/social-register.dto';
 import { ForgotPasswordDto } from '../dtos/requests/forgot-password.dto';
 import { SystemUserLoginDto } from '../dtos/requests/login.dto';
 import { ResetPasswordDto } from '../dtos/requests/reset-password.dto';
@@ -27,6 +26,17 @@ export class AuthController extends BaseController {
     public async loginSocial(@User() user): Promise<{ accessToken: string }> {
         return await this.authService.socialLogin(user.uid);
     }
+
+    @ApiOperation({ summary: 'Login by refresh token' })
+    @Post('user/login-by-refresh-token')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    public async loginByRefeshToken(@User() user): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
+        return await this.authService.loginByRefeshToken(user.id);
+    }
+
     @ApiOperation({ summary: 'Test Only' })
     @Post('user/fake-login')
     @Version('1')

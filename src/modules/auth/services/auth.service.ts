@@ -32,6 +32,30 @@ export class AuthService {
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
+    public async loginByRefeshToken(userId: string): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
+        try {
+            const user = await this._userRepository.findOneBy({
+                id: userId,
+            });
+
+            const payload = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+            };
+
+            return {
+                accessToken: this.jwtService.sign(payload),
+                refreshToken: this.jwtService.sign(payload, { expiresIn: '30d' }),
+                user: this._mapper.map(user, UserEntity, UserDto),
+            };
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    }
+
     // For test only
     public async loginById(id: string): Promise<{ accessToken: string }> {
         try {
