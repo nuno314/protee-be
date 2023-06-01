@@ -22,25 +22,36 @@ export class LocationController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
-    @Roles(RolesEnum.ADMIN)
+    // @Roles(RolesEnum.ADMIN)
     public async getLocations(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
         return await this._locationService.getPagedList(params);
     }
 
-    @ApiOperation({ summary: 'Update a location' })
+    @ApiOperation({ summary: 'Admin update a location' })
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Update location',
     })
-    @Put('/')
+    @Put('/system-user')
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
     @Roles(RolesEnum.ADMIN)
     public async updateLocation(@Body() body: UpdateLocationDto): Promise<boolean> {
-        return await this._locationService.update(body);
+        return await this._locationService.adminUpdate(body);
     }
-
+    @ApiOperation({ summary: 'User update a location' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Update location',
+    })
+    @Put('/user')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(RolesGuard)
+    public async userUpdateLocation(@Body() body: { locationId: string }): Promise<boolean> {
+        return await this._locationService.userUpdate(body.locationId);
+    }
     @ApiOperation({ summary: 'Create a location' })
     @ApiResponse({
         status: HttpStatus.OK,
@@ -50,7 +61,7 @@ export class LocationController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
-    @Roles(RolesEnum.ADMIN)
+    // @Roles(RolesEnum.ADMIN)
     public async createLocation(@Body() body: CreateLocationDto): Promise<CreateLocationDto> {
         return await this._locationService.create(body);
     }
