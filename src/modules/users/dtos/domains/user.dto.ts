@@ -1,5 +1,6 @@
-import { AutoMap } from "@automapper/classes";
-import { AbstractDto } from "../../../../common/dto/abstract.dto";
+import { AutoMap } from '@automapper/classes';
+
+import { AbstractDto } from '../../../../common/dto/abstract.dto';
 
 export class UserDto extends AbstractDto {
     @AutoMap()
@@ -16,4 +17,7 @@ export class UserDto extends AbstractDto {
 
     @AutoMap()
     dob: Date;
+
+    @AutoMap()
+    avt: string;
 }
