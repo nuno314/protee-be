@@ -6,4 +6,16 @@ export class PaginationLocationDto {
     @IsString()
     @IsOptional()
     filter?: string;
+    @ApiProperty()
+    @IsString()
+    @IsOptional()
+    sortField?: string;
+    @ApiProperty()
+    @IsString()
+    @IsOptional()
+    order = 'ASC' || 'DESC';
+    @ApiProperty()
+    @IsString()
+    @IsOptional()
+    status?: string;
 }
