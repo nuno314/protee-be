@@ -11,6 +11,10 @@ export class UserEntity extends AbstractEntity {
     @AutoMap()
     name: string;
 
+    @Column({ nullable: true })
+    @AutoMap()
+    avt: string;
+
     @Column()
     @AutoMap()
     firebaseId: string;

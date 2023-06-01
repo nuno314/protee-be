@@ -56,7 +56,12 @@ export class AuthService {
             throw err;
         }
     }
-    public async socialLogin(firebaseId: string, name?: string): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
+    public async socialLogin(
+        firebaseId: string,
+        name?: string,
+        avt?: string,
+        email?: string
+    ): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
         try {
             const userExist = await this._userRepository.findOneBy({
                 firebaseId: firebaseId,
@@ -67,6 +72,8 @@ export class AuthService {
                 if (!name) throw new BadRequestException('missing_name');
                 const userDto = {
                     name: name,
+                    avt: avt,
+                    email: email,
                     isActive: true,
                     firebaseId: firebaseId,
                 };
@@ -76,6 +83,10 @@ export class AuthService {
                 if (userEntity) {
                     user = userEntity;
                 }
+            }
+            if (!user.avt && avt) {
+                user.avt = avt;
+                await this._userRepository.save(user);
             }
 
             const payload = {
