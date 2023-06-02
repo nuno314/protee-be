@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { SharedModule } from '../../shared/shared.module';
+import { FamilyModule } from '../family/family.module';
 import { SystemUsersModule } from '../system-users/system-users.module';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './controllers/auth.controller';
@@ -27,6 +28,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
                 signOptions: { expiresIn: '24h' },
             }),
         }),
+        FamilyModule,
         PassportModule,
         TypeOrmModule.forFeature([ResetPasswordRequestEntity]),
     ],

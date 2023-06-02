@@ -1,6 +1,7 @@
 import { AutoMap } from '@automapper/classes';
 
 import { AbstractDto } from '../../../../common/dto/abstract.dto';
+import { FamilyRoleEnum } from '../../../family/enums/family-role.enum';
 
 export class UserDto extends AbstractDto {
     @AutoMap()
@@ -20,4 +21,7 @@ export class UserDto extends AbstractDto {
 
     @AutoMap()
     avt: string;
+
+    familyRole?: FamilyRoleEnum;
+    familyId?: string;
 }

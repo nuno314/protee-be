@@ -13,3 +13,10 @@ export class SystemUserLoginDto {
     @MaxLength(255)
     password: string;
 }
+
+export class LoginByRefreshToken {
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    refreshToken: string;
+}

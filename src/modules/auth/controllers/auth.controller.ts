@@ -7,7 +7,7 @@ import { FirebaseAuthGuard } from '../../../guards/firebase.guard';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { UserDto } from '../../users/dtos/domains/user.dto';
 import { ForgotPasswordDto } from '../dtos/requests/forgot-password.dto';
-import { SystemUserLoginDto } from '../dtos/requests/login.dto';
+import { LoginByRefreshToken, SystemUserLoginDto } from '../dtos/requests/login.dto';
 import { ResetPasswordDto } from '../dtos/requests/reset-password.dto';
 import { AuthService } from '../services/auth.service';
 
@@ -31,10 +31,10 @@ export class AuthController extends BaseController {
     @Post('user/login-by-refresh-token')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    public async loginByRefeshToken(@User() user): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
-        return await this.authService.loginByRefeshToken(user.id);
+    public async loginByRefeshToken(
+        @Body() request: LoginByRefreshToken
+    ): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
+        return await this.authService.loginByRefeshToken(request.refreshToken);
     }
 
     @ApiOperation({ summary: 'Test Only' })

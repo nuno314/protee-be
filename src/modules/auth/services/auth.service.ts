@@ -4,12 +4,14 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
 import { Repository } from 'typeorm';
 
 import { AppConfigService } from '../../../shared/services/app-config.service';
 import { MailService } from '../../../shared/services/mail.service';
 import { OtpService } from '../../../shared/services/otp.service';
 import { UtilsService } from '../../../shared/services/utils.service';
+import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
 import { SystemUserEntity } from '../../system-users/entities/system-users.entity';
 import { UserDto } from '../../users/dtos/domains/user.dto';
 import { UserEntity } from '../../users/entities/users.entity';
@@ -29,14 +31,22 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly _configService: AppConfigService,
         private readonly _mailService: MailService,
+        private readonly _configServie: AppConfigService,
+        @InjectRepository(FamilyMemberEntity) private readonly _familyMemberEntity: Repository<FamilyMemberEntity>,
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
-    public async loginByRefeshToken(userId: string): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
+    public async loginByRefeshToken(token: string): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
         try {
+            const result: any = jwt.verify(token, this._configServie.get('APP_SECRET'));
+
             const user = await this._userRepository.findOneBy({
-                id: userId,
+                id: result?.id,
             });
+
+            if (!user) throw new NotFoundException('user_not_found');
+
+            const memberInfor = await this._familyMemberEntity.findOneBy({ userId: user.id });
 
             const payload = {
                 id: user.id,
@@ -45,19 +55,24 @@ export class AuthService {
                 phoneNumber: user.phoneNumber,
             };
 
+            const userDto = this._mapper.map(user, UserEntity, UserDto);
+
+            userDto.familyRole = memberInfor?.role;
+            userDto.familyId = memberInfor?.familyId;
+
             return {
                 accessToken: this.jwtService.sign(payload),
                 refreshToken: this.jwtService.sign(payload, { expiresIn: '30d' }),
-                user: this._mapper.map(user, UserEntity, UserDto),
+                user: userDto,
             };
         } catch (err) {
             console.log(err);
-            throw err;
+            return null;
         }
     }
 
     // For test only
-    public async loginById(id: string): Promise<{ accessToken: string }> {
+    public async loginById(id: string): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
         try {
             const user = await this._userRepository.findOneBy({
                 id,
@@ -73,8 +88,17 @@ export class AuthService {
                 email: user.email,
                 phoneNumber: user.phoneNumber,
             };
+            const memberInfor = await this._familyMemberEntity.findOneBy({ userId: user.id });
+            const userDto = this._mapper.map(user, UserEntity, UserDto);
 
-            return { accessToken: this.jwtService.sign(payload) };
+            userDto.familyRole = memberInfor?.role;
+            userDto.familyId = memberInfor?.familyId;
+
+            return {
+                accessToken: this.jwtService.sign(payload),
+                refreshToken: this.jwtService.sign(payload, { expiresIn: '30d' }),
+                user: userDto,
+            };
         } catch (err) {
             console.log(err);
             throw err;
@@ -120,10 +144,16 @@ export class AuthService {
                 phoneNumber: user.phoneNumber,
             };
 
+            const memberInfor = await this._familyMemberEntity.findOneBy({ userId: user.id });
+            const userDto = this._mapper.map(user, UserEntity, UserDto);
+
+            userDto.familyRole = memberInfor?.role;
+            userDto.familyId = memberInfor?.familyId;
+
             return {
                 accessToken: this.jwtService.sign(payload),
                 refreshToken: this.jwtService.sign(payload, { expiresIn: '30d' }),
-                user: this._mapper.map(user, UserEntity, UserDto),
+                user: userDto,
             };
         } catch (err) {
             console.log(err);
