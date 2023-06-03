@@ -271,11 +271,13 @@ export class FamilyService {
         const needToUpdateMember = await this._familyMemberRepository.findOneBy({ id: memberId, familyId: requestMember.familyId });
 
         if (!needToUpdateMember) throw new NotFoundException('member_not_found');
-        if (needToUpdateMember.role === FamilyRoleEnum.Child) throw new ForbiddenException('it_is_parent');
-        const updateMember = { ...needToUpdateMember, role: FamilyRoleEnum.Parent };
-        const result = await this._familyMemberRepository.save(updateMember, {
-            data: { request: this._req },
-        });
+        if (needToUpdateMember.role === FamilyRoleEnum.Parent) throw new ForbiddenException('it_is_parent');
+        const result = await this._familyMemberRepository.save(
+            { ...needToUpdateMember, role: FamilyRoleEnum.Parent },
+            {
+                data: { request: this._req },
+            }
+        );
         return !!result;
     }
     public async updateParentToChild(memberId: string): Promise<boolean> {
@@ -288,10 +290,12 @@ export class FamilyService {
         if (!needToUpdateMember) throw new NotFoundException('member_not_found');
         if (needToUpdateMember.role === FamilyRoleEnum.Child) throw new ForbiddenException('it_is_child');
         if (needToUpdateMember.userId === requestMember.userId) throw new ForbiddenException('cannot_update_yourself');
-        const updateMember = { ...needToUpdateMember, role: FamilyRoleEnum.Child };
-        const result = await this._familyMemberRepository.save(updateMember, {
-            data: { request: this._req },
-        });
+        const result = await this._familyMemberRepository.save(
+            { ...needToUpdateMember, role: FamilyRoleEnum.Child },
+            {
+                data: { request: this._req },
+            }
+        );
         return !!result;
     }
 }
