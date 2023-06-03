@@ -65,7 +65,7 @@ export class UserController extends BaseController {
     @Put('/profile')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    public async updateAccount(@User() user, @Body() body: UpdateAccountDto): Promise<boolean> {
+    public async updateAccount(@User() user, @Body() body: UpdateAccountDto): Promise<UserDto> {
         return await this._userService.updateProfile(user.id, body);
     }
 

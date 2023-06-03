@@ -38,21 +38,21 @@ export class UsersService {
             return false;
         }
     }
-    public async updateProfile(userId: string, dto: UpdateAccountDto): Promise<boolean> {
+    public async updateProfile(userId: string, dto: UpdateAccountDto): Promise<UserDto> {
         const user = await this._userRepository.findOneBy({ id: userId });
 
         if (!user) throw new NotFoundException('user_not_found');
 
-        const updateUser = { ...user, ...dto };
+        const updateUser: UserEntity = { ...user, ...dto };
 
         try {
             const result = await this._userRepository.save(updateUser, {
                 data: { request: this._req },
             });
-            return !!result;
+            return this._mapper.map(result, UserEntity, UserDto);
         } catch (err) {
             console.log(err);
-            return false;
+            throw err;
         }
     }
 

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsDate, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsUUID } from 'class-validator';
 
 export class UpdateAccountDto {
     @ApiProperty()
@@ -10,7 +10,7 @@ export class UpdateAccountDto {
     @ApiProperty()
     @IsOptional()
     @IsString()
-    dob: string;
+    dob: Date;
 
     @ApiProperty()
     @IsOptional()
