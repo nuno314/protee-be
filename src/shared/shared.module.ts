@@ -10,13 +10,22 @@ import * as path from 'path';
 import { CustomerProvider } from '../decorators/customer.factory';
 import { AppConfigService } from './services/app-config.service';
 import { BaseHttpService } from './services/base-http.service';
+import { FirebaseService } from './services/firebase.service';
 import { MailService } from './services/mail.service';
 import { OtpService } from './services/otp.service';
-import { S3Service } from './services/s3.service';
 import { UtilsService } from './services/utils.service';
 import { ValidatorService } from './services/validator.service';
 
-const providers = [CustomerProvider, AppConfigService, ValidatorService, UtilsService, MailService, BaseHttpService, S3Service, OtpService];
+const providers = [
+    FirebaseService,
+    CustomerProvider,
+    AppConfigService,
+    ValidatorService,
+    UtilsService,
+    MailService,
+    BaseHttpService,
+    OtpService,
+];
 
 @Global()
 @Module({

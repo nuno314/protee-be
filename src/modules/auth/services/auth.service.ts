@@ -132,7 +132,7 @@ export class AuthService {
                     user = userEntity;
                 }
             }
-            if (!user.avt && avt) {
+            if (avt) {
                 user.avt = avt;
                 await this._userRepository.save(user);
             }
