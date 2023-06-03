@@ -263,4 +263,39 @@ export class FamilyService {
 
         return !!(await this._familyMemberRepository.softRemove(needToDeleteMember, { data: { request: this._req } }));
     }
+    public async updateChildToParent(memberId: string): Promise<boolean> {
+        const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
+
+        if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
+
+        const needToUpdateMember = await this._familyMemberRepository.findOneBy({ id: memberId, familyId: requestMember.familyId });
+
+        if (!needToUpdateMember) throw new NotFoundException('member_not_found');
+        if (needToUpdateMember.role === FamilyRoleEnum.Parent) throw new ForbiddenException('it_is_parent');
+        const result = await this._familyMemberRepository.save(
+            { ...needToUpdateMember, role: FamilyRoleEnum.Parent },
+            {
+                data: { request: this._req },
+            }
+        );
+        return !!result;
+    }
+    public async updateParentToChild(memberId: string): Promise<boolean> {
+        const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
+
+        if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
+
+        const needToUpdateMember = await this._familyMemberRepository.findOneBy({ id: memberId, familyId: requestMember.familyId });
+
+        if (!needToUpdateMember) throw new NotFoundException('member_not_found');
+        if (needToUpdateMember.role === FamilyRoleEnum.Child) throw new ForbiddenException('it_is_child');
+        if (needToUpdateMember.userId === requestMember.userId) throw new ForbiddenException('cannot_update_yourself');
+        const result = await this._familyMemberRepository.save(
+            { ...needToUpdateMember, role: FamilyRoleEnum.Child },
+            {
+                data: { request: this._req },
+            }
+        );
+        return !!result;
+    }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Version } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UseGuards, Version } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { BaseController } from '../../../common/base.controller';
@@ -73,5 +73,19 @@ export class FamilyController extends BaseController {
     @UseGuards(JwtAuthGuard)
     async removeMember(@Body() body: { memberId: string }) {
         return await this._familyService.removeMemberFromFamily(body.memberId);
+    }
+    @ApiOperation({ summary: 'Update child to parent' })
+    @Put('/update-child')
+    @Version('1')
+    @UseGuards(JwtAuthGuard)
+    async updateChild(@Body() body: { memberId: string }) {
+        return await this._familyService.updateChildToParent(body.memberId);
+    }
+    @ApiOperation({ summary: 'Update parent to child' })
+    @Put('/update-parent')
+    @Version('1')
+    @UseGuards(JwtAuthGuard)
+    async updateParent(@Body() body: { memberId: string }) {
+        return await this._familyService.updateParentToChild(body.memberId);
     }
 }

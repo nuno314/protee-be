@@ -33,6 +33,7 @@ export class LocationService {
                 long: createLocationDto.long,
                 lat: createLocationDto.lat,
                 status: createLocationDto.status,
+                createdBy: this._req.user.id,
             });
             if (locationExist) {
                 throw new BadRequestException('location_does_exist');
@@ -46,24 +47,40 @@ export class LocationService {
             throw err;
         }
     }
-    public async getPagedList(params: PaginationLocationDto): Promise<Location[]> {
+    public async getPagedListAdmin(params: PaginationLocationDto): Promise<Location[]> {
         try {
             const queryBuilder = this._locationRepository.createQueryBuilder('location');
             const filter = params.filter ? params.filter : '';
             queryBuilder.andWhere([{ name: ILike(`%${filter}%`) }]);
             queryBuilder.orderBy(params.sortField, params.order === 'ASC' ? 'ASC' : 'DESC');
-
-            if (this._req.user.role !== RolesEnum.ADMIN) {
-                queryBuilder.andWhere((locations) => {
-                    locations.where({ status: 'personal', createdBy: this._req.user.id });
-                    locations.orWhere({ status: 'published' });
-                });
-            }
             if (params.status) {
                 const status = params.status ? params.status : '';
                 queryBuilder.andWhere({ status: status });
             }
 
+            const result = await queryBuilder.getMany();
+            return result;
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    }
+    public async getPagedListUser(params: PaginationLocationDto): Promise<Location[]> {
+        try {
+            const queryBuilder = this._locationRepository.createQueryBuilder('location');
+            const filter = params.filter ? params.filter : '';
+            queryBuilder.andWhere([{ name: ILike(`%${filter}%`) }]);
+            queryBuilder.orderBy(params.sortField, params.order === 'ASC' ? 'ASC' : 'DESC');
+            if (params.status) {
+                const status = params.status ? params.status : '';
+                queryBuilder.andWhere({ status: status });
+            }
+            console.log(this._req.user.id);
+            queryBuilder.andWhere((locations) => {
+                locations.where({ status: LocationStatusEnum.Personal, createdBy: this._req.user.id });
+                locations.orWhere({ status: LocationStatusEnum.Published });
+                locations.orWhere({ status: LocationStatusEnum.WaitingPublish, createdBy: this._req.user.id });
+            });
             const result = await queryBuilder.getMany();
             return result;
         } catch (err) {

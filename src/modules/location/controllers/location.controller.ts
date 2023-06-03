@@ -17,16 +17,24 @@ import { LocationService } from '../services/location.service';
 @UseGuards(JwtAuthGuard)
 export class LocationController {
     constructor(private readonly _locationService: LocationService) {}
-    @ApiOperation({ summary: 'Get locations' })
-    @Get()
+    @ApiOperation({ summary: 'Get locations for admin' })
+    @Get('/system-user')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(RolesGuard)
+    @Roles(RolesEnum.ADMIN)
+    public async getLocationAdmin(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
+        return await this._locationService.getPagedListAdmin(params);
+    }
+    @ApiOperation({ summary: 'Get locations for user' })
+    @Get('/user')
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
     // @Roles(RolesEnum.ADMIN)
-    public async getLocations(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
-        return await this._locationService.getPagedList(params);
+    public async getLocationUser(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
+        return await this._locationService.getPagedListUser(params);
     }
-
     @ApiOperation({ summary: 'Admin update a location' })
     @ApiResponse({
         status: HttpStatus.OK,
