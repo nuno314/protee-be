@@ -49,6 +49,8 @@ async function bootstrap() {
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
+        allowedHeaders:
+            'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
     };
 
     // Enable CORS with the specified options
@@ -66,7 +68,6 @@ async function bootstrap() {
     SwaggerModule.setup('', app, document);
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new HttpExceptionFilter());
-    app.enableCors();
 
     await app.listen(port, host);
 
