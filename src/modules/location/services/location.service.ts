@@ -25,7 +25,7 @@ export class LocationService {
         private readonly _familyService: FamilyService
     ) {}
 
-    async getNearlyLocation(latitude: number, longitude: number): Promise<Location[]> {
+    public async getNearlyLocation(latitude: number, longitude: number): Promise<Location[]> {
         try {
             const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
             const userId = this._req.user.id;
