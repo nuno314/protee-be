@@ -22,4 +22,7 @@ export class Location extends AbstractEntity {
 
     @Column({ nullable: true })
     description: string;
+
+    @Column()
+    icon: string;
 }

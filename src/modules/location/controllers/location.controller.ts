@@ -26,7 +26,7 @@ export class LocationController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
     @Roles(RolesEnum.ADMIN)
-    public async getLocationAdmin(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
+    public async getLocationByAdmin(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
         return await this._locationService.getPagedListByAdmin(params);
     }
     @ApiOperation({ summary: 'Get locations for user' })
@@ -35,10 +35,10 @@ export class LocationController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
     // @Roles(RolesEnum.ADMIN)
-    public async getLocationUser(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
+    public async getLocationByUser(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
         return await this._locationService.getPagedListByUser(params);
     }
-    @ApiOperation({ summary: 'Admin update a location' })
+    @ApiOperation({ summary: 'Admin update status of  location' })
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Update location',
@@ -48,10 +48,10 @@ export class LocationController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
     @Roles(RolesEnum.ADMIN)
-    public async updateLocation(@Body() body: UpdateLocationDto): Promise<boolean> {
-        return await this._locationService.adminUpdate(body);
+    public async updateStatusByAdmin(@Body() body: UpdateLocationDto): Promise<boolean> {
+        return await this._locationService.adminUpdateLocation(body);
     }
-    @ApiOperation({ summary: 'User update a location' })
+    @ApiOperation({ summary: 'User publish a location' })
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Update location',
@@ -60,8 +60,8 @@ export class LocationController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
-    public async userUpdateLocation(@Body() body: { locationId: string }): Promise<boolean> {
-        return await this._locationService.userUpdate(body.locationId);
+    public async publishLocationByUser(@Body() body: { locationId: string }): Promise<boolean> {
+        return await this._locationService.userPublishLocation(body.locationId);
     }
     @ApiOperation({ summary: 'Create a location' })
     @ApiResponse({
@@ -72,7 +72,7 @@ export class LocationController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     public async createLocation(@Body() body: CreateLocationDto): Promise<CreateLocationDto> {
-        return await this._locationService.create(body);
+        return await this._locationService.createLocation(body);
     }
 
     @ApiOperation({ summary: 'Get nearly dangerous location' })

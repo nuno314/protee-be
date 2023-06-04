@@ -18,4 +18,7 @@ export class LocationDto extends AbstractDto {
 
     @AutoMap()
     status?: LocationStatusEnum;
+
+    @AutoMap()
+    icon: string;
 }

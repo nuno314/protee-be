@@ -54,7 +54,7 @@ export class LocationService {
         }
     }
 
-    async create(createLocationDto: CreateLocationDto): Promise<Location> {
+    async createLocation(createLocationDto: CreateLocationDto): Promise<Location> {
         try {
             if (this._req.user.role === RolesEnum.ADMIN) {
                 createLocationDto.status = LocationStatusEnum.Published;
@@ -67,6 +67,7 @@ export class LocationService {
                 long: createLocationDto.long,
                 lat: createLocationDto.lat,
                 status: createLocationDto.status,
+                createdBy: this._req.user.id,
             });
             if (createLocationDto.familyId) {
                 query.andWhere({ familyId: createLocationDto.familyId });
@@ -132,25 +133,31 @@ export class LocationService {
             throw err;
         }
     }
-    public async adminUpdate(dto: UpdateLocationDto): Promise<boolean> {
+    public async adminUpdateLocation(dto: UpdateLocationDto): Promise<boolean> {
+        if (LocationStatusEnum[dto.status] === undefined) throw new ForbiddenException('wrong_input');
         const location = await this._locationRepository.findOneBy({ id: dto.id });
-
         if (!location) throw new NotFoundException('location_not_found');
-        if (location.status !== LocationStatusEnum.Published) throw new ForbiddenException('no_permission');
-        const status: string = dto.status;
-        const updateLocation = { ...location, status: LocationStatusEnum[status] };
-
+        if (
+            location.status === LocationStatusEnum.Personal ||
+            LocationStatusEnum[dto.status] === LocationStatusEnum.WaitingPublish ||
+            ((location.status === LocationStatusEnum.Published || location.status === LocationStatusEnum.Hidden) &&
+                LocationStatusEnum[dto.status] === LocationStatusEnum.Personal)
+        )
+            throw new ForbiddenException('no_permission');
         try {
-            const result = await this._locationRepository.save(updateLocation, {
-                data: { request: this._req },
-            });
+            const result = await this._locationRepository.save(
+                { ...location, status: LocationStatusEnum[dto.status] },
+                {
+                    data: { request: this._req },
+                }
+            );
             return !!result;
         } catch (err) {
             console.log(err);
             return false;
         }
     }
-    public async userUpdate(locationId: string): Promise<boolean> {
+    public async userPublishLocation(locationId: string): Promise<boolean> {
         const location = await this._locationRepository.findOneBy({ id: locationId });
 
         if (!location) throw new NotFoundException('location_not_found');
@@ -160,12 +167,13 @@ export class LocationService {
         )
             throw new ForbiddenException('no_permission');
 
-        const updateLocation = { ...location, status: LocationStatusEnum.WaitingPublish };
-
         try {
-            const result = await this._locationRepository.save(updateLocation, {
-                data: { request: this._req },
-            });
+            const result = await this._locationRepository.save(
+                { ...location, status: LocationStatusEnum.WaitingPublish },
+                {
+                    data: { request: this._req },
+                }
+            );
             return !!result;
         } catch (err) {
             console.log(err);

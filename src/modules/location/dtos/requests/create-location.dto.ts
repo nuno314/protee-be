@@ -9,6 +9,7 @@ export class CreateLocationDto {
 
     status?: LocationStatusEnum;
     familyId?: string;
+    icon?: string;
 
     @IsNumber()
     @IsNotEmpty()
