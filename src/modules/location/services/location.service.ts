@@ -9,9 +9,10 @@ import { PaginationLocationDto } from '../../../common/dto/pagination-location.d
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { AppConfigService } from '../../../shared/services/app-config.service';
 import { FamilyService } from '../../family/services/family.service';
+import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
-import { Location } from '../entities/location.entity';
+import { LocationEntity } from '../entities/location.entity';
 import { LocationStatusEnum } from '../enums/location-status.enum';
 
 @Injectable()
@@ -19,13 +20,13 @@ export class LocationService {
     constructor(
         @Inject(REQUEST) private readonly _req,
         @InjectRepository(Location)
-        private readonly _locationRepository: Repository<Location>,
+        private readonly _locationRepository: Repository<LocationEntity>,
         @InjectMapper() private readonly _mapper: Mapper,
         private readonly _configService: AppConfigService,
         private readonly _familyService: FamilyService
     ) {}
 
-    public async getNearlyLocation(latitude: number, longitude: number): Promise<Location[]> {
+    public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
         try {
             const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
             const userId = this._req.user.id;
@@ -47,14 +48,14 @@ export class LocationService {
                         )
                 order by distance`
             );
-            return locations;
+            return this._mapper.mapArray(locations, LocationEntity, LocationDto);
         } catch (e) {
             console.log(e);
             return [];
         }
     }
 
-    async createLocation(createLocationDto: CreateLocationDto): Promise<Location> {
+    async createLocation(createLocationDto: CreateLocationDto): Promise<LocationDto> {
         try {
             if (this._req.user.role === RolesEnum.ADMIN) {
                 createLocationDto.status = LocationStatusEnum.Published;
@@ -79,13 +80,13 @@ export class LocationService {
             const location = await this._locationRepository.save(createLocationDto, {
                 data: { request: this._req },
             });
-            return location;
+            return this._mapper.map(location, LocationEntity, LocationDto);
         } catch (err) {
             console.log(err);
             throw err;
         }
     }
-    public async getPagedListByAdmin(params: PaginationLocationDto): Promise<Location[]> {
+    public async getPagedListByAdmin(params: PaginationLocationDto): Promise<LocationDto[]> {
         try {
             const queryBuilder = this._locationRepository.createQueryBuilder('location');
             const filter = params.filter ? params.filter : '';
@@ -97,13 +98,13 @@ export class LocationService {
             }
 
             const result = await queryBuilder.getMany();
-            return result;
+            return this._mapper.mapArray(result, LocationEntity, LocationDto);
         } catch (err) {
             console.log(err);
             throw err;
         }
     }
-    public async getPagedListByUser(params: PaginationLocationDto): Promise<Location[]> {
+    public async getPagedListByUser(params: PaginationLocationDto): Promise<LocationDto[]> {
         try {
             const queryBuilder = this._locationRepository.createQueryBuilder('location');
             const filter = params.filter ? params.filter : '';
@@ -127,7 +128,7 @@ export class LocationService {
                 }
             });
             const result = await queryBuilder.getMany();
-            return result;
+            return this._mapper.mapArray(result, LocationEntity, LocationDto);
         } catch (err) {
             console.log(err);
             throw err;

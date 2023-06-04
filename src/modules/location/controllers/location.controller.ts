@@ -10,7 +10,6 @@ import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { GetNearlyLocationRequest } from '../dtos/requests/get-nearly-location.request';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
-import { Location } from '../entities/location.entity';
 import { LocationService } from '../services/location.service';
 
 @ApiTags('location')
@@ -71,7 +70,7 @@ export class LocationController {
     @Post('/')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    public async createLocation(@Body() body: CreateLocationDto): Promise<CreateLocationDto> {
+    public async createLocation(@Body() body: CreateLocationDto): Promise<LocationDto> {
         return await this._locationService.createLocation(body);
     }
 
@@ -83,7 +82,7 @@ export class LocationController {
     @Post('/get-nearly')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    public async getNearlyLocation(@Body() body: GetNearlyLocationRequest): Promise<Location[]> {
+    public async getNearlyLocation(@Body() body: GetNearlyLocationRequest): Promise<LocationDto[]> {
         return await this._locationService.getNearlyLocation(body.lat, body.long);
     }
 }

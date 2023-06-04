@@ -3,12 +3,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { FamilyModule } from '../family/family.module';
 import { LocationController } from './controllers/location.controller';
-import { Location } from './entities/location.entity';
+import { LocationEntity } from './entities/location.entity';
+import { LocationProfile } from './location.mapper';
 import { LocationService } from './services/location.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Location]), FamilyModule],
+    imports: [TypeOrmModule.forFeature([LocationEntity]), FamilyModule],
     controllers: [LocationController],
-    providers: [LocationService],
+    providers: [LocationService, LocationProfile],
+    exports: [LocationService, LocationProfile],
 })
 export class LocationModule {}
