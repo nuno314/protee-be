@@ -23,6 +23,6 @@ export class Location extends AbstractEntity {
     @Column({ nullable: true })
     description: string;
 
-    @Column()
+    @Column({ default: 'https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/geocode-71.png' })
     icon: string;
 }
