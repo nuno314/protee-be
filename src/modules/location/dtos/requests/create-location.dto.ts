@@ -8,6 +8,7 @@ export class CreateLocationDto {
     name: string;
 
     status?: LocationStatusEnum;
+    familyId?: string;
 
     @IsNumber()
     @IsNotEmpty()

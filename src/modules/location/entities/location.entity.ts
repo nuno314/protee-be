@@ -11,6 +11,9 @@ export class Location extends AbstractEntity {
     @Column()
     status: LocationStatusEnum;
 
+    @Column({ type: 'uuid', nullable: true })
+    familyId: string;
+
     @Column('decimal', { precision: 10, scale: 6 })
     lat: number;
 

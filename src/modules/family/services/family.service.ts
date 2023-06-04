@@ -31,6 +31,10 @@ export class FamilyService {
         @InjectMapper() private readonly _mapper: Mapper
     ) {}
 
+    public async getMemberInformationByUserId(userId: string): Promise<FamilyMemberEntity> {
+        return await this._familyMemberRepository.findOneBy({ userId });
+    }
+
     public async removeJoinRequest(requestId: string): Promise<boolean> {
         if (!requestId) throw new BadRequestException('id_is_required');
 
