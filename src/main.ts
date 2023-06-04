@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // import * as cors from 'cors';
@@ -43,6 +44,15 @@ async function bootstrap() {
     //         'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
     // };
     // app.use(cors(corsOptions));
+
+    const corsOptions: CorsOptions = {
+        origin: true,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+    };
+
+    // Enable CORS with the specified options
+    app.enableCors(corsOptions);
 
     const port = Number(process.env.PORT) || 3000;
     const host = process.env.HOST || '0.0.0.0';
