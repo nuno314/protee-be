@@ -37,11 +37,11 @@ export class LocationService {
                 where 
                     st_dwithin(st_makepoint(${latitude}, ${longitude}), st_makepoint(location.lat, location.long), ${radius / 100000})
                     AND 
-                        (location.status = ${LocationStatusEnum.Published}
-                            OR (location.status IN(${LocationStatusEnum.Personal}, ${LocationStatusEnum.WaitingPublish})    
+                        (location.status = '${LocationStatusEnum.Published}'
+                            OR (location.status IN('${LocationStatusEnum.Personal}', '${LocationStatusEnum.WaitingPublish}')    
                                     AND (
-                                        location.created_by = ${userId}
-                                        ${memberInformation ? 'OR location.family_id = ' + memberInformation.familyId : ''}
+                                        location.created_by = '${userId}'
+                                        ${memberInformation ? "OR location.family_id = '" + memberInformation.familyId + "'" : ''}
                                     )
                                 )
                         )
