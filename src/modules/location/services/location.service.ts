@@ -19,7 +19,7 @@ import { LocationStatusEnum } from '../enums/location-status.enum';
 export class LocationService {
     constructor(
         @Inject(REQUEST) private readonly _req,
-        @InjectRepository(Location)
+        @InjectRepository(LocationEntity)
         private readonly _locationRepository: Repository<LocationEntity>,
         @InjectMapper() private readonly _mapper: Mapper,
         private readonly _configService: AppConfigService,
