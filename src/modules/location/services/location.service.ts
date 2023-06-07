@@ -147,7 +147,7 @@ export class LocationService {
             throw new ForbiddenException('no_permission');
         try {
             const result = await this._locationRepository.save(
-                { ...location, status: LocationStatusEnum[dto.status] },
+                { ...location, status: LocationStatusEnum[dto.status], updatedBy: this._req.user.id },
                 {
                     data: { request: this._req },
                 }
@@ -170,7 +170,7 @@ export class LocationService {
 
         try {
             const result = await this._locationRepository.save(
-                { ...location, status: LocationStatusEnum.WaitingPublish },
+                { ...location, status: LocationStatusEnum.WaitingPublish, updatedBy: this._req.user.id },
                 {
                     data: { request: this._req },
                 }

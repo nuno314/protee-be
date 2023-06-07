@@ -11,8 +11,8 @@ export class EntitySubscriber implements EntitySubscriberInterface {
     beforeInsert(event: InsertEvent<any>) {
         if (event.queryRunner.data['request']) {
             const req: any = event.queryRunner.data['request'];
-            event.entity.createdBy = req.user?.id;
-            event.entity.updatedBy = req.user?.id;
+            event.entity.createdBy = event.entity.createdBy ? event.entity.createdBy : req.user?.id;
+            event.entity.updatedBy = event.entity.createdBy ? event.entity.createdBy : req.user?.id;
         }
     }
 
@@ -24,7 +24,7 @@ export class EntitySubscriber implements EntitySubscriberInterface {
 
         if (event.queryRunner.data['request']) {
             const req: any = event.queryRunner.data['request'];
-            event.entity.updatedBy = req.user?.id;
+            event.entity.updatedBy = req.user?.id ? req.user?.id : event.entity.updatedBy;
         }
     }
 
@@ -34,9 +34,7 @@ export class EntitySubscriber implements EntitySubscriberInterface {
     beforeSoftRemove(event: SoftRemoveEvent<any>) {
         if (event.queryRunner.data['request']) {
             const req: any = event.queryRunner.data['request'];
-            event.entity.deletedBy = req.user?.id;
+            event.entity.deletedBy = event.entity.deletedBy ? event.entity.deletedBy : req.user?.id;
         }
     }
-
-    
 }

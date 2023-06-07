@@ -26,7 +26,7 @@ export class UsersService {
 
         if (!user) throw new NotFoundException('user_not_found');
 
-        const updateUser = { ...user, ...dto };
+        const updateUser = { ...user, ...dto, updatedBy: this._req.user.id };
 
         try {
             const result = await this._userRepository.save(updateUser, {
@@ -43,7 +43,7 @@ export class UsersService {
 
         if (!user) throw new NotFoundException('user_not_found');
 
-        const updateUser: UserEntity = { ...user, ...dto };
+        const updateUser: UserEntity = { ...user, ...dto, updatedBy: this._req.user.id };
 
         try {
             const result = await this._userRepository.save(updateUser, {
