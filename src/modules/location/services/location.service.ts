@@ -77,6 +77,7 @@ export class LocationService {
             if (locationExist) {
                 throw new BadRequestException('location_does_exist');
             }
+            createLocationDto.createdBy = this._req.user.id;
             const location = await this._locationRepository.save(createLocationDto, {
                 data: { request: this._req },
             });

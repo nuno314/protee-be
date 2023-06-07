@@ -22,4 +22,6 @@ export class CreateLocationDto {
     @IsString()
     @IsOptional()
     description: string;
+
+    createdBy?: string;
 }
