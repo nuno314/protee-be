@@ -25,6 +25,7 @@ export class MessageService {
             content: params.content,
             familyId: family.id,
             seenBy: [],
+            createdBy: this._req.user.id,
         };
         return await this._messageRepo.save(message, { data: { request: this._req } });
     }

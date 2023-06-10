@@ -134,6 +134,7 @@ export class FamilyService {
                 familyId: request.familyId,
                 userId: request.createdBy,
                 role: FamilyRoleEnum.Child,
+                createdBy: this._req.user.id,
             };
 
             const createMemberResult = await this._familyMemberRepository.save(member, { data: { request: this._req } });
@@ -162,6 +163,7 @@ export class FamilyService {
         try {
             const familyEntity: FamilyEntity = {
                 name: `${user.name}'s family`,
+                createdBy: this._req.user.id,
             };
             const createFamilyResult = await this._familyRepository.save(familyEntity, { data: { request: this._req } });
 
@@ -169,6 +171,7 @@ export class FamilyService {
                 familyId: createFamilyResult.id,
                 userId: user.id,
                 role: FamilyRoleEnum.Parent,
+                createdBy: this._req.user.id,
             };
 
             const createMemberResult = await this._familyMemberRepository.save(member, { data: { request: this._req } });
@@ -181,6 +184,7 @@ export class FamilyService {
                 const inviteCodeEntity: FamilyInviteCodeEntity = {
                     code,
                     familyId: createFamilyResult.id,
+                    createdBy: this._req.user.id,
                 };
                 const createInviteCodeResult = await this._familyInviteCodeRepository.save(inviteCodeEntity, {
                     data: { request: this._req },
@@ -220,6 +224,7 @@ export class FamilyService {
             const request: JoinFamilyRequestEntity = {
                 familyId: invideCodeEntity.familyId,
                 isApproved: false,
+                createdBy: this._req.user.id,
             };
 
             const createRequestResult = await this._joinFamilyRequestRepository.save(request, { data: { request: this._req } });
@@ -277,7 +282,7 @@ export class FamilyService {
         if (!needToUpdateMember) throw new NotFoundException('member_not_found');
         if (needToUpdateMember.role === FamilyRoleEnum.Parent) throw new ForbiddenException('it_is_parent');
         const result = await this._familyMemberRepository.save(
-            { ...needToUpdateMember, role: FamilyRoleEnum.Parent },
+            { ...needToUpdateMember, role: FamilyRoleEnum.Parent, updatedBy: this._req.user.id },
             {
                 data: { request: this._req },
             }
@@ -295,7 +300,7 @@ export class FamilyService {
         if (needToUpdateMember.role === FamilyRoleEnum.Child) throw new ForbiddenException('it_is_child');
         if (needToUpdateMember.userId === requestMember.userId) throw new ForbiddenException('cannot_update_yourself');
         const result = await this._familyMemberRepository.save(
-            { ...needToUpdateMember, role: FamilyRoleEnum.Child },
+            { ...needToUpdateMember, role: FamilyRoleEnum.Child, updatedBy: this._req.user.id },
             {
                 data: { request: this._req },
             }
