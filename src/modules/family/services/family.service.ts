@@ -120,7 +120,7 @@ export class FamilyService {
         return await this._familyRepository.findOneBy({ id: memberData.familyId });
     }
 
-    public async approveJoinFamily(requestId: string): Promise<boolean> {
+    public async approveJoinFamily(requestId: string): Promise<StatusResponseDto> {
         const request = await this._joinFamilyRequestRepository.findOneBy({ id: requestId });
 
         if (!request) throw new NotFoundException('request_not_found');
@@ -142,10 +142,10 @@ export class FamilyService {
 
             const createMemberResult = await this._familyMemberRepository.save(member, { data: { request: this._req } });
             await this._joinFamilyRequestRepository.softRemove(request);
-            return !!createMemberResult;
+            return { result: !!createMemberResult };
         } catch (err) {
             console.log(err);
-            return false;
+            return { result: false };
         }
     }
 
