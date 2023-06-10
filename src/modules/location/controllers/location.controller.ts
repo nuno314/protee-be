@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Query, UseGuard
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PaginationLocationDto } from '../../../common/dto/pagination-location.dto';
+import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { Roles } from '../../../decorators/role.decorator';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
@@ -59,7 +60,7 @@ export class LocationController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
-    public async publishLocationByUser(@Body() body: { locationId: string }): Promise<boolean> {
+    public async publishLocationByUser(@Body() body: { locationId: string }): Promise<StatusResponseDto> {
         return await this._locationService.userPublishLocation(body.locationId);
     }
     @ApiOperation({ summary: 'Create a location' })
@@ -81,7 +82,7 @@ export class LocationController {
     @Post('/user-remove')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    public async removeLocationByUser(@Body() body: { locationId: string }): Promise<boolean> {
+    public async removeLocationByUser(@Body() body: { locationId: string }): Promise<StatusResponseDto> {
         return await this._locationService.userRemoveLocation(body.locationId);
     }
 

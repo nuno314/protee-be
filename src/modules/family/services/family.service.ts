@@ -5,6 +5,7 @@ import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 
+import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { UtilsService } from '../../../shared/services/utils.service';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
@@ -35,7 +36,7 @@ export class FamilyService {
         return await this._familyMemberRepository.findOneBy({ userId });
     }
 
-    public async removeJoinRequest(requestId: string): Promise<boolean> {
+    public async removeJoinRequest(requestId: string): Promise<StatusResponseDto> {
         if (!requestId) throw new BadRequestException('id_is_required');
 
         const request = await this._joinFamilyRequestRepository.findOneBy({ id: requestId });
@@ -49,7 +50,9 @@ export class FamilyService {
         if (member.familyId !== request.familyId) throw new ForbiddenException('not_same_family');
         if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_remove_join_request');
 
-        return !!(await this._joinFamilyRequestRepository.softRemove(request, { data: { request: this._req } }));
+        return {
+            result: !!(await this._joinFamilyRequestRepository.softRemove(request, { data: { request: this._req } })),
+        };
     }
 
     public async getFamilyProfile(): Promise<FamilyEntity> {
@@ -198,7 +201,7 @@ export class FamilyService {
         }
     }
 
-    public async joinFamilyByInviteCode(code: string): Promise<boolean> {
+    public async joinFamilyByInviteCode(code: string): Promise<StatusResponseDto> {
         if (!code) throw new BadRequestException('code_is_required');
 
         const invideCodeEntity = await this._familyInviteCodeRepository.findOneBy({ code });
@@ -228,26 +231,26 @@ export class FamilyService {
             };
 
             const createRequestResult = await this._joinFamilyRequestRepository.save(request, { data: { request: this._req } });
-            return !!createRequestResult;
+            return { result: !!createRequestResult };
         } catch (err) {
             console.log(err);
-            return false;
+            return { result: false };
         }
     }
 
-    public async leaveCurrentFamily(): Promise<boolean> {
+    public async leaveCurrentFamily(): Promise<StatusResponseDto> {
         const member = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
 
         if (!member) throw new BadRequestException('not_a_member');
 
         if (member.role === FamilyRoleEnum.Child) {
-            return !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } }));
+            return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
         }
 
         const otherMembersOfFamily = await this._familyMemberRepository.findBy({ familyId: member.familyId, userId: Not(member.userId) });
 
         if (!otherMembersOfFamily.length) {
-            return !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } }));
+            return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
         }
 
         const otherParents = await this._familyMemberRepository.findOneBy({
@@ -258,10 +261,10 @@ export class FamilyService {
 
         if (!otherParents) throw new BadRequestException('the_only_parent_cannot_leave');
 
-        return !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } }));
+        return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
     }
 
-    public async removeMemberFromFamily(memberId: string): Promise<boolean> {
+    public async removeMemberFromFamily(memberId: string): Promise<StatusResponseDto> {
         const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
 
         if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
@@ -270,9 +273,9 @@ export class FamilyService {
 
         if (!needToDeleteMember) throw new NotFoundException('member_not_found');
 
-        return !!(await this._familyMemberRepository.softRemove(needToDeleteMember, { data: { request: this._req } }));
+        return { result: !!(await this._familyMemberRepository.softRemove(needToDeleteMember, { data: { request: this._req } })) };
     }
-    public async updateChildToParent(memberId: string): Promise<boolean> {
+    public async updateChildToParent(memberId: string): Promise<StatusResponseDto> {
         const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
 
         if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
@@ -287,9 +290,9 @@ export class FamilyService {
                 data: { request: this._req },
             }
         );
-        return !!result;
+        return { result: !!result };
     }
-    public async updateParentToChild(memberId: string): Promise<boolean> {
+    public async updateParentToChild(memberId: string): Promise<StatusResponseDto> {
         const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
 
         if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
@@ -305,6 +308,6 @@ export class FamilyService {
                 data: { request: this._req },
             }
         );
-        return !!result;
+        return { result: !!result };
     }
 }
