@@ -57,8 +57,8 @@ export class AuthService {
 
             const userDto = this._mapper.map(user, UserEntity, UserDto);
 
-            userDto.familyRole = memberInfor?.role;
-            userDto.familyId = memberInfor?.familyId;
+            userDto.familyRole = memberInfor?.role || null;
+            userDto.familyId = memberInfor?.familyId || null;
 
             return {
                 accessToken: this.jwtService.sign(payload),
