@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 
 import { PaginationLocationDto } from '../../../common/dto/pagination-location.dto';
+import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { AppConfigService } from '../../../shared/services/app-config.service';
 import { FamilyService } from '../../family/services/family.service';
@@ -159,7 +160,7 @@ export class LocationService {
             return false;
         }
     }
-    public async userPublishLocation(locationId: string): Promise<boolean> {
+    public async userPublishLocation(locationId: string): Promise<StatusResponseDto> {
         const location = await this._locationRepository.findOneBy({ id: locationId });
 
         if (!location) throw new NotFoundException('location_not_found');
@@ -176,13 +177,13 @@ export class LocationService {
                     data: { request: this._req },
                 }
             );
-            return !!result;
+            return { result: !!result };
         } catch (err) {
             console.log(err);
-            return false;
+            return { result: false };
         }
     }
-    public async userRemoveLocation(locationId: string): Promise<boolean> {
+    public async userRemoveLocation(locationId: string): Promise<StatusResponseDto> {
         const location = await this._locationRepository.findOneBy({ id: locationId });
         if (!location) throw new NotFoundException('location_not_found');
         if (location.status !== LocationStatusEnum.Personal || location.createdBy !== this._req.user.id)
@@ -191,10 +192,10 @@ export class LocationService {
             const result =
                 (await this._locationRepository.softRemove(location)) &&
                 (await this._locationRepository.save({ ...location, createdBy: null }));
-            return !!result;
+            return { result: !!result };
         } catch (err) {
             console.log(err);
-            return false;
+            return { result: false };
         }
     }
 }
