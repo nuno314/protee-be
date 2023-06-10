@@ -181,4 +181,19 @@ export class LocationService {
             return false;
         }
     }
+    public async userRemoveLocation(locationId: string): Promise<boolean> {
+        const location = await this._locationRepository.findOneBy({ id: locationId });
+        if (!location) throw new NotFoundException('location_not_found');
+        if (location.status !== LocationStatusEnum.Personal || location.createdBy !== this._req.user.id)
+            throw new ForbiddenException('no_permission');
+        try {
+            const result =
+                (await this._locationRepository.softRemove(location)) &&
+                (await this._locationRepository.save({ ...location, createdBy: null }));
+            return !!result;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
+    }
 }

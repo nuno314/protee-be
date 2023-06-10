@@ -73,6 +73,17 @@ export class LocationController {
     public async createLocation(@Body() body: CreateLocationDto): Promise<LocationDto> {
         return await this._locationService.createLocation(body);
     }
+    @ApiOperation({ summary: 'User remove a location' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Remove a location',
+    })
+    @Post('/user-remove')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    public async removeLocationByUser(@Body() body: { locationId: string }): Promise<boolean> {
+        return await this._locationService.userRemoveLocation(body.locationId);
+    }
 
     @ApiOperation({ summary: 'Get nearly dangerous location' })
     @ApiResponse({
