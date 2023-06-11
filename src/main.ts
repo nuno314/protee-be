@@ -48,9 +48,9 @@ async function bootstrap() {
     const corsOptions: CorsOptions = {
         origin: origin,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        credentials: true,
+        credentials: origin !== '*',
         allowedHeaders:
-            'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
+            'Access-Control-Allow-Origin,Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
     };
 
     // Enable CORS with the specified options
