@@ -210,6 +210,10 @@ export class FamilyService {
 
         const memberEntity = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
 
+        const existedRequest = await this._joinFamilyRequestRepository.findOneBy({ createdBy: this._req?.user?.id });
+
+        if (existedRequest) throw new BadRequestException('user_has_waiting_request');
+
         if (memberEntity) {
             const numberMemberOfCurrentFamily = await this._familyMemberRepository.countBy({ familyId: memberEntity.familyId });
             if (numberMemberOfCurrentFamily > 1) throw new BadRequestException('user_joined_other_family');
