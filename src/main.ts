@@ -35,7 +35,7 @@ async function bootstrap() {
             res.json(document);
         });
     }
-    // const origin = process.env.ORIGIN || '*';
+    const origin = process.env.ORIGIN || '*';
     // const corsOptions = {
     //     origin: origin,
     //     methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
@@ -46,7 +46,7 @@ async function bootstrap() {
     // app.use(cors(corsOptions));
 
     const corsOptions: CorsOptions = {
-        origin: '*',
+        origin: origin,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true,
         allowedHeaders:
