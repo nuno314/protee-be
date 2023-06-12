@@ -17,6 +17,9 @@ export class LocationDto extends AbstractDto {
     description: string;
 
     @AutoMap()
+    distance?: number;
+
+    @AutoMap()
     status?: LocationStatusEnum;
 
     @AutoMap()

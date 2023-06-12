@@ -14,9 +14,19 @@ export class LocationAccessHistoryEntity extends AbstractEntity {
     @Column({ type: 'uuid', nullable: true })
     locationId: string;
 
-    @ManyToOne(() => LocationEntity, (location) => location.accessHistory, {
-        onDelete: 'CASCADE',
-    })
+    @AutoMap()
+    @Column()
+    distance: number;
+
+    @AutoMap()
+    @Column('decimal', { precision: 10, scale: 6 })
+    currentLat: number;
+
+    @AutoMap()
+    @Column('decimal', { precision: 10, scale: 6 })
+    currentLong: number;
+
+    @ManyToOne(() => LocationEntity, (location) => location.accessHistory)
     @JoinColumn({ name: 'location_id' })
-    location: LocationEntity;
+    location?: LocationEntity;
 }

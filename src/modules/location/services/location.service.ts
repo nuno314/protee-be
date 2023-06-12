@@ -10,11 +10,14 @@ import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { AppConfigService } from '../../../shared/services/app-config.service';
 import { FamilyService } from '../../family/services/family.service';
+import { UsersService } from '../../users/services/users.service';
 import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
 import { LocationEntity } from '../entities/location.entity';
+import { LocationAccessHistoryEntity } from '../entities/location-access-history.entity';
 import { LocationStatusEnum } from '../enums/location-status.enum';
+import { NotificationGateway } from '../gateway/notification.gateway';
 
 @Injectable()
 export class LocationService {
@@ -22,9 +25,13 @@ export class LocationService {
         @Inject(REQUEST) private readonly _req,
         @InjectRepository(LocationEntity)
         private readonly _locationRepository: Repository<LocationEntity>,
+        @InjectRepository(LocationAccessHistoryEntity)
+        private readonly _locationAccessHistoryRepository: Repository<LocationAccessHistoryEntity>,
         @InjectMapper() private readonly _mapper: Mapper,
         private readonly _configService: AppConfigService,
-        private readonly _familyService: FamilyService
+        private readonly _familyService: FamilyService,
+        private readonly _notificationGateway: NotificationGateway,
+        private readonly _userService: UsersService
     ) {}
 
     public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
@@ -32,7 +39,7 @@ export class LocationService {
             const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
             const userId = this._req.user.id;
             const memberInformation = await this._familyService.getMemberInformationByUserId(userId);
-            const locations = await this._locationRepository.query(
+            const locations: LocationEntity[] = await this._locationRepository.query(
                 `Select *,
                     st_distancesphere(st_makepoint(${latitude}, ${longitude}),st_makepoint(location.lat, location.long)) as distance
                 from location
@@ -49,7 +56,27 @@ export class LocationService {
                         )
                 order by distance`
             );
-            return this._mapper.mapArray(locations, LocationEntity, LocationDto);
+            const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
+                return {
+                    userId,
+                    createdBy: userId,
+                    locationId: item.id,
+                    currentLat: latitude,
+                    currentLong: longitude,
+                    distance: item.distance,
+                };
+            });
+
+            await this._locationAccessHistoryRepository.save(accessHistoryItems, {
+                data: { request: this._req },
+            });
+            const user = await this._userService.getById(userId);
+            const noti = {
+                user,
+                locations,
+            };
+            this._notificationGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
+            return this._mapper.mapArray(locations || [], LocationEntity, LocationDto);
         } catch (e) {
             console.log(e);
             return [];
