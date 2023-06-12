@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // import * as cors from 'cors';
 import { json } from 'express';
@@ -68,6 +69,7 @@ async function bootstrap() {
     SwaggerModule.setup('', app, document);
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new HttpExceptionFilter());
+    app.useWebSocketAdapter(new IoAdapter(app));
 
     await app.listen(port, host);
 
