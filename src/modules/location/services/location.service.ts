@@ -10,6 +10,7 @@ import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { AppConfigService } from '../../../shared/services/app-config.service';
 import { FamilyService } from '../../family/services/family.service';
+import { ChatGateway } from '../../message/gateway/chat.gateway';
 import { UsersService } from '../../users/services/users.service';
 import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
@@ -17,7 +18,6 @@ import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
 import { LocationEntity } from '../entities/location.entity';
 import { LocationAccessHistoryEntity } from '../entities/location-access-history.entity';
 import { LocationStatusEnum } from '../enums/location-status.enum';
-import { NotificationGateway } from '../gateway/notification.gateway';
 
 @Injectable()
 export class LocationService {
@@ -30,7 +30,7 @@ export class LocationService {
         @InjectMapper() private readonly _mapper: Mapper,
         private readonly _configService: AppConfigService,
         private readonly _familyService: FamilyService,
-        private readonly _notificationGateway: NotificationGateway,
+        private readonly _socketGateway: ChatGateway,
         private readonly _userService: UsersService
     ) {}
 
@@ -56,6 +56,9 @@ export class LocationService {
                         )
                 order by distance`
             );
+
+            if (!locations.length) return [];
+
             const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
                 return {
                     userId,
@@ -75,7 +78,7 @@ export class LocationService {
                 user,
                 locations,
             };
-            this._notificationGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
+            this._socketGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
             return this._mapper.mapArray(locations || [], LocationEntity, LocationDto);
         } catch (e) {
             console.log(e);
