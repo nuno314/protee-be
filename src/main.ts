@@ -3,6 +3,7 @@ import 'source-map-support/register';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // import * as cors from 'cors';
 import { json } from 'express';
@@ -35,7 +36,7 @@ async function bootstrap() {
             res.json(document);
         });
     }
-    // const origin = process.env.ORIGIN || '*';
+    const origin = process.env.ORIGIN || '*';
     // const corsOptions = {
     //     origin: origin,
     //     methods: 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS',
@@ -46,11 +47,11 @@ async function bootstrap() {
     // app.use(cors(corsOptions));
 
     const corsOptions: CorsOptions = {
-        origin: true,
+        origin: origin,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        credentials: true,
+        credentials: origin !== '*',
         allowedHeaders:
-            'Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
+            'Access-Control-Allow-Origin,Accept,Accept-Version,Content-Length,Content-MD5,Content-Type,Referer,X-Api-Version,Sec-Ch-Ua,Sec-Ch-Ua-Mobile,Sec-Ch-Ua-Platform,User-Agent,Authorization',
     };
 
     // Enable CORS with the specified options
@@ -68,6 +69,7 @@ async function bootstrap() {
     SwaggerModule.setup('', app, document);
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new HttpExceptionFilter());
+    app.useWebSocketAdapter(new IoAdapter(app));
 
     await app.listen(port, host);
 

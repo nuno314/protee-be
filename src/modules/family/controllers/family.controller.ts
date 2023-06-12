@@ -59,6 +59,13 @@ export class FamilyController extends BaseController {
     async approveJoin(@Body() body: { requestId: string }) {
         return await this._familyService.approveJoinFamily(body.requestId);
     }
+    @ApiOperation({ summary: 'Parent remove join rquest' })
+    @Post('/reject')
+    @Version('1')
+    @UseGuards(JwtAuthGuard)
+    async removeJoinRequest(@Body() body: { requestId: string }) {
+        return await this._familyService.removeJoinRequest(body.requestId);
+    }
 
     @ApiOperation({ summary: 'Leave family' })
     @Post('/leave')
