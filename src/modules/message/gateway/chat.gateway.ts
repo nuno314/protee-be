@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+import { FamilyRoleEnum } from '../../family/enums/family-role.enum';
+
 @WebSocketGateway({
     cors: {
         origin: '*',
@@ -26,6 +28,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 return this._disconnect(socket);
             }
 
+            if (isVerify.role !== FamilyRoleEnum.Parent) {
+                await socket.join(`parent_${familyId}`);
+                await this.server.to(socket.id).emit('join', `Join Room: parent_${familyId}`);
+            }
+
             this.server.to(socket.id).emit('join', 'connected to websocket');
 
             await socket.join(familyId);
@@ -33,6 +40,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         } catch {
             return this._disconnect(socket);
         }
+    }
+
+    async emitNotification(noti: any, socketId: string = null): Promise<void> {
+        if (socketId) {
+            this.server.to(socketId).emit('notification', noti);
+        } else {
+            const clients = await this.server.allSockets();
+            this.server.to([...clients]).emit('notification', noti);
+        }
+    }
+
+    async emitNotificationToRoom(noti: any, room: string): Promise<void> {
+        this.server.to(room).emit('notification', noti);
     }
 
     handleDisconnect(socket: Socket): void {
