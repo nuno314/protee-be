@@ -6,10 +6,10 @@ import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
     cors: {
         origin: '*',
-        credentials: true,
+        // credentials: true,
     },
-    path: '/messages',
-    transports: ['websocket', 'polling', 'flashsocket'],
+    // path: '/messages',
+    // transports: ['websocket', 'polling', 'flashsocket'],
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
@@ -21,15 +21,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         try {
             const accessToken = this._getToken(socket);
             const familyId = this._getFamilyId(socket);
-            // const isVerify = await this.jwtService.verify(accessToken);
-            // if (!isVerify) {
-            //     return this._disconnect(socket);
-            // }
+            const isVerify = await this.jwtService.verify(accessToken);
+            if (!isVerify) {
+                return this._disconnect(socket);
+            }
 
             this.server.to(socket.id).emit('join', 'connected to websocket');
 
             await socket.join(familyId);
-            this.server.to(socket.id).emit('join', `Join Room: ${familyId}`);
+            await this.server.to(socket.id).emit('join', `Join Room: ${familyId}`);
         } catch {
             return this._disconnect(socket);
         }
@@ -44,21 +44,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         socket.disconnect();
     }
 
-    async emitNotification(noti: any, socketId: string = null): Promise<void> {
+    async emitMessage(noti: any, socketId: string = null): Promise<void> {
         if (socketId) {
-            this.server.to(socketId).emit('notification', noti);
+            this.server.to(socketId).emit('message', noti);
         } else {
             const clients = await this.server.allSockets();
-            this.server.to([...clients]).emit('notification', noti);
+            this.server.to([...clients]).emit('message', noti);
         }
     }
 
-    async emitNotificationToRoom(noti: any, room: string): Promise<void> {
-        this.server.to(room).emit('notification', noti);
+    async emitMessageToRoom(noti: any, room: string): Promise<void> {
+        this.server.to(room).emit('message', noti);
     }
 
     private _getToken(socket: Socket): string | null {
-        const token = socket.handshake.auth.token || (socket.handshake.query['token'] as string);
+        const token = socket.handshake.auth.token || (socket.handshake.query['accessToken'] as string);
         if (token) {
             return token;
         }

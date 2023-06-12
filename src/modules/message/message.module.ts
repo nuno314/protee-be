@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -13,10 +13,12 @@ import { MessageService } from './services/message.service';
 @Module({
     imports: [
         JwtModule.registerAsync({
-            useFactory: (configService: AppConfigService) => ({
-                secret: configService.get('APP_SECRECT'),
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (configService: ConfigService) => ({
+                secret: configService.get('APP_SECRET'),
+                signOptions: { expiresIn: '24h' },
             }),
-            inject: [AppConfigService],
         }),
         ConfigModule.forRoot(),
         FamilyModule,

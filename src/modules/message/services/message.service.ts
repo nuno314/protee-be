@@ -8,6 +8,7 @@ import { PaginationResponseDto } from '../../../common/dto/pagination-response.d
 import { FamilyService } from '../../family/services/family.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { MessageEntity } from '../entities/message.entity';
+import { ChatGateway } from '../gateway/chat.gateway';
 
 @Injectable()
 export class MessageService {
@@ -15,7 +16,8 @@ export class MessageService {
         @InjectRepository(MessageEntity)
         private _messageRepo: Repository<MessageEntity>,
         @Inject(REQUEST) private readonly _req,
-        private readonly _familyService: FamilyService
+        private readonly _familyService: FamilyService,
+        private readonly _chatGateway: ChatGateway
     ) {}
     async createMessage(params: CreateMessageDto): Promise<MessageEntity> {
         const family = await this._familyService.getFamilyByUserId(this._req.user.id);
@@ -27,7 +29,9 @@ export class MessageService {
             seenBy: [],
             createdBy: this._req.user.id,
         };
-        return await this._messageRepo.save(message, { data: { request: this._req } });
+        const sendResult = await this._messageRepo.save(message, { data: { request: this._req } });
+        await this._chatGateway.emitMessageToRoom(sendResult, family.id);
+        return sendResult;
     }
 
     async getMessages(params: PaginationRequestDto): Promise<PaginationResponseDto<MessageEntity>> {
