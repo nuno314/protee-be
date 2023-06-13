@@ -35,30 +35,29 @@ export class LocationService {
     ) {}
 
     public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
-        try {
-            const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
-            const userId = this._req.user.id;
-            const memberInformation = await this._familyService.getMemberInformationByUserId(userId);
-            const locations: LocationEntity[] = await this._locationRepository.query(
-                `Select *,
-                    st_distancesphere(st_makepoint(${latitude}, ${longitude}),st_makepoint(location.lat, location.long)) as distance
-                from location
-                where 
-                    st_dwithin(st_makepoint(${latitude}, ${longitude}), st_makepoint(location.lat, location.long), ${radius / 100000})
-                    AND 
-                        (location.status = '${LocationStatusEnum.Published}'
-                            OR (location.status IN('${LocationStatusEnum.Personal}', '${LocationStatusEnum.WaitingPublish}')    
-                                    AND (
-                                        location.created_by = '${userId}'
-                                        ${memberInformation ? "OR location.family_id = '" + memberInformation.familyId + "'" : ''}
-                                    )
+        const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
+        const userId = this._req.user.id;
+        const memberInformation = await this._familyService.getMemberInformationByUserId(userId);
+        const locations: LocationEntity[] = await this._locationRepository.query(
+            `Select *,
+                st_distancesphere(st_makepoint(${latitude}, ${longitude}),st_makepoint(location.lat, location.long)) as distance
+            from location
+            where 
+                st_dwithin(st_makepoint(${latitude}, ${longitude}), st_makepoint(location.lat, location.long), ${radius / 100000})
+                AND 
+                    (location.status = '${LocationStatusEnum.Published}'
+                        OR (location.status IN('${LocationStatusEnum.Personal}', '${LocationStatusEnum.WaitingPublish}')    
+                                AND (
+                                    location.created_by = '${userId}'
+                                    ${memberInformation ? "OR location.family_id = '" + memberInformation.familyId + "'" : ''}
                                 )
-                        )
-                order by distance`
-            );
+                            )
+                    )
+            order by distance`
+        );
 
-            if (!locations.length) return [];
-
+        if (!locations.length) return [];
+        try {
             const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
                 return {
                     userId,
@@ -79,11 +78,10 @@ export class LocationService {
                 locations,
             };
             this._socketGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
-            return this._mapper.mapArray(locations || [], LocationEntity, LocationDto);
         } catch (e) {
             console.log(e);
-            return [];
         }
+        return this._mapper.mapArray(locations || [], LocationEntity, LocationDto);
     }
 
     async createLocation(createLocationDto: CreateLocationDto): Promise<LocationDto> {
