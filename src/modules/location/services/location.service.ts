@@ -65,7 +65,7 @@ export class LocationService {
                     locationId: item.id,
                     currentLat: latitude,
                     currentLong: longitude,
-                    distance: item.distance,
+                    distance: parseInt(item.distance.toString()),
                 };
             });
 
