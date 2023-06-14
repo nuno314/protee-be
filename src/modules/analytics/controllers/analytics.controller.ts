@@ -21,6 +21,14 @@ export class AnalyticsController extends BaseController {
     }
 
     /* Method GET */
+    @ApiOperation({ summary: 'Get family basic information' })
+    @Get('family/basic-information')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    public async getBasicFamilyAnalytics(): Promise<any> {
+        return await this._analytics.getBasicFamilyAnalytics();
+    }
     @ApiOperation({ summary: 'Get number user' })
     @Get('admin/number-user')
     @Version('1')

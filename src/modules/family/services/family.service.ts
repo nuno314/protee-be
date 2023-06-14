@@ -7,7 +7,7 @@ import { Not, Repository } from 'typeorm';
 
 import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { UtilsService } from '../../../shared/services/utils.service';
-import { FamilyUserEntity } from '../../users/entities/user-family-response.entity';
+import { FamilyUserDto } from '../../users/dtos/responses/user-family-response.dto';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
 import { UserInviteCodeDto } from '../dtos/responses/user-invite-code.dto';
@@ -262,7 +262,7 @@ export class FamilyService {
         }
     }
 
-    public async leaveCurrentFamily(): Promise<FamilyUserEntity | StatusResponseDto> {
+    public async leaveCurrentFamily(): Promise<FamilyUserDto | StatusResponseDto> {
         const member = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
 
         if (!member) throw new BadRequestException('not_a_member');

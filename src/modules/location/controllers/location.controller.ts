@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Query, UseGuards, Version } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards, Version } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PaginationLocationDto } from '../../../common/dto/pagination-location.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
 import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { Roles } from '../../../decorators/role.decorator';
@@ -10,8 +11,11 @@ import { RolesGuard } from '../../../guards/role.guard';
 import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { GetNearlyLocationRequest } from '../dtos/requests/get-nearly-location.request';
+import { GetUserAccessLocationHistoryRequest } from '../dtos/requests/get-user-access-location.request';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
 import { LocationEntity } from '../entities/location.entity';
+import { LocationAccessHistoryEntity } from '../entities/location-access-history.entity';
+import { UserLocationHistoryEntity } from '../entities/user-location-history.entity';
 import { LocationService } from '../services/location.service';
 
 @ApiTags('location')
@@ -21,6 +25,22 @@ import { LocationService } from '../services/location.service';
 export class LocationController {
     constructor(private readonly _locationService: LocationService) {}
 
+    @ApiOperation({ summary: 'Get user last location' })
+    @Get('/user/last-location/:userId')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    public async getUserLastLocation(@Param('userId') userId: string): Promise<UserLocationHistoryEntity> {
+        return await this._locationService.getUserLastLocation(userId);
+    }
+    @ApiOperation({ summary: 'Get locations for admin' })
+    @Get('/user/location-history')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    public async getUserAccessLocationHistory(
+        @Query() params: GetUserAccessLocationHistoryRequest
+    ): Promise<PaginationResponseDto<LocationAccessHistoryEntity>> {
+        return await this._locationService.getUserAccessLocationHistory(params);
+    }
     @ApiOperation({ summary: 'Get locations for admin' })
     @Get('/system-user')
     @Version('1')

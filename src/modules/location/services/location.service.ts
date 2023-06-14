@@ -3,17 +3,21 @@ import { InjectMapper } from '@automapper/nestjs';
 import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import * as moment from 'moment';
+import { ILike, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { PaginationLocationDto } from '../../../common/dto/pagination-location.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
 import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 import { AppConfigService } from '../../../shared/services/app-config.service';
+import { FamilyRoleEnum } from '../../family/enums/family-role.enum';
 import { FamilyService } from '../../family/services/family.service';
 import { ChatGateway } from '../../message/gateway/chat.gateway';
 import { UsersService } from '../../users/services/users.service';
 import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
+import { GetUserAccessLocationHistoryRequest } from '../dtos/requests/get-user-access-location.request';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
 import { LocationEntity } from '../entities/location.entity';
 import { LocationAccessHistoryEntity } from '../entities/location-access-history.entity';
@@ -36,6 +40,78 @@ export class LocationService {
         @InjectRepository(UserLocationHistoryEntity)
         private readonly _userLocationHistoryRepository: Repository<UserLocationHistoryEntity>
     ) {}
+
+    public async getUserAccessLocationHistory(
+        request: GetUserAccessLocationHistoryRequest
+    ): Promise<PaginationResponseDto<LocationAccessHistoryEntity>> {
+        const requestMemberInfor = await this._familyService.getMemberInformationByUserId(this._req.user.id);
+        if (requestMemberInfor?.role !== FamilyRoleEnum.Parent) throw new ForbiddenException();
+
+        const targetMemberInfor = await this._familyService.getMemberInformationByUserId(request.userId);
+        if (requestMemberInfor?.familyId !== targetMemberInfor?.familyId) throw new ForbiddenException();
+
+        try {
+            const builder = this._locationAccessHistoryRepository
+                .createQueryBuilder('access')
+                .where({ createdBy: request.userId, createdAt: MoreThanOrEqual(moment(request.fromDate).startOf('day').format()) })
+                .andWhere({ createdAt: LessThanOrEqual(moment(request.toDate).endOf('day').format()) })
+                .leftJoinAndSelect('access.userLocationHistory', 'history')
+                .where(`history.family_id = :familyId`, { familyId: targetMemberInfor?.familyId })
+                .skip(request.skip)
+                .take(request.take)
+                .orderBy('access.createdAt', 'DESC');
+
+            const [data, total] = await builder.getManyAndCount();
+
+            if (!data?.length)
+                return {
+                    data: [],
+                    total: 0,
+                    take: 0,
+                    page: 0,
+                };
+
+            const locationHistoryIds = data.map((x) => x.userLocationHistoryId);
+            const userLocationHistories = await this._userLocationHistoryRepository.findBy({ id: In(locationHistoryIds) });
+
+            data.map((x) => {
+                x.userLocationHistory = userLocationHistories.find((y) => y.id === x.userLocationHistoryId);
+            });
+
+            return {
+                data: data,
+                total: total,
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                data: [],
+                total: 0,
+                take: 0,
+                page: 0,
+            };
+        }
+    }
+
+    public async getUserLastLocation(userId: string): Promise<UserLocationHistoryEntity> {
+        const requestMemberInfor = await this._familyService.getMemberInformationByUserId(this._req.user.id);
+        if (requestMemberInfor?.role !== FamilyRoleEnum.Parent) throw new ForbiddenException();
+
+        const targetMemberInfor = await this._familyService.getMemberInformationByUserId(userId);
+        if (requestMemberInfor?.familyId !== targetMemberInfor?.familyId) throw new ForbiddenException();
+
+        const result = await this._userLocationHistoryRepository
+            .createQueryBuilder()
+            .where({ createdBy: userId, familyId: targetMemberInfor.familyId })
+            .orderBy('created_at', 'DESC')
+            .getOne();
+
+        if (!result) return null;
+
+        const targetUserInfor = await this._userService.getById(userId);
+        result.user = targetUserInfor;
+        return result;
+    }
 
     public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
         const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
@@ -65,6 +141,7 @@ export class LocationService {
                 currentLat: latitude,
                 currentLong: longitude,
                 createdBy: userId,
+                familyId: memberInformation?.familyId,
             };
 
             const userLocationHistory = await this._userLocationHistoryRepository.save(userLocationHistoryDto, {

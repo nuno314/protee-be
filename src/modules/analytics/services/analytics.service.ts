@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { FamilyEntity } from '../../family/entities/family.entity';
 import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
 import { LocationEntity } from '../../location/entities/location.entity';
-import { LocationAccessHistoryEntity } from '../../location/entities/location-access-history.entity';
+import { UserLocationHistoryEntity } from '../../location/entities/user-location-history.entity';
 import { LocationStatusEnum } from '../../location/enums/location-status.enum';
 import { UserEntity } from '../../users/entities/users.entity';
 
@@ -22,8 +22,8 @@ export class AnalyticsService {
         private readonly _locationRepository: Repository<LocationEntity>,
         @InjectRepository(FamilyMemberEntity)
         private readonly _familyMemberRepository: Repository<FamilyMemberEntity>,
-        @InjectRepository(LocationAccessHistoryEntity)
-        private readonly _locationAccessHistoryEntity: Repository<LocationAccessHistoryEntity>
+        @InjectRepository(UserLocationHistoryEntity)
+        private readonly _userLocationHistoryRepository: Repository<UserLocationHistoryEntity>
     ) {}
 
     public async getBasicFamilyAnalytics(): Promise<any> {
@@ -31,9 +31,27 @@ export class AnalyticsService {
         if (!memberInfor) throw new BadGatewayException('not_a_family_member');
         const response = {
             numberMembers: await this._familyMemberRepository.createQueryBuilder().where({ familyId: memberInfor.familyId }).getCount(),
-            numberLocations: await this._locationRepository.createQueryBuilder().where({ familyId: memberInfor.familyId }).getCount(),
-            // numberWarningTimes: await this._locationAccessHistoryEntity.createQueryBuilder('log').where({ })
+            numberLocations: await this._locationRepository
+                .createQueryBuilder()
+                .where({ familyId: memberInfor.familyId })
+                .orWhere({ status: LocationStatusEnum.Published })
+                .getCount(),
+            numberWarningTimes: Number(
+                (
+                    await this._userLocationHistoryRepository.query(`SELECT count(*)
+            FROM user_location_history AS u
+            INNER JOIN location_access_history AS p ON p.id = (
+                SELECT id
+                FROM location_access_history AS p2
+                WHERE p2.user_location_history_id = u.id
+                ORDER BY p.created_at DESC
+                LIMIT 1
+            )
+            where p.id IS NOT NULL`)
+                )[0]?.count || 0
+            ),
         };
+        return response;
     }
 
     public async getNumberUserByAdmin(): Promise<number> {
