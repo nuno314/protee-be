@@ -17,6 +17,7 @@ import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
 import { LocationEntity } from '../entities/location.entity';
 import { LocationAccessHistoryEntity } from '../entities/location-access-history.entity';
+import { UserLocationHistoryEntity } from '../entities/user-location-history.entity';
 import { LocationStatusEnum } from '../enums/location-status.enum';
 
 @Injectable()
@@ -31,7 +32,9 @@ export class LocationService {
         private readonly _configService: AppConfigService,
         private readonly _familyService: FamilyService,
         private readonly _socketGateway: ChatGateway,
-        private readonly _userService: UsersService
+        private readonly _userService: UsersService,
+        @InjectRepository(UserLocationHistoryEntity)
+        private readonly _userLocationHistoryRepository: Repository<UserLocationHistoryEntity>
     ) {}
 
     public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
@@ -58,13 +61,20 @@ export class LocationService {
 
         if (!locations.length) return [];
         try {
+            const userLocationHistoryDto: UserLocationHistoryEntity = {
+                currentLat: latitude,
+                currentLong: longitude,
+                createdBy: userId,
+            };
+
+            const userLocationHistory = await this._userLocationHistoryRepository.save(userLocationHistoryDto, {
+                data: { request: this._req },
+            });
             const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
                 return {
-                    userId,
                     createdBy: userId,
                     locationId: item.id,
-                    currentLat: latitude,
-                    currentLong: longitude,
+                    userLocationHistoryId: userLocationHistory.id,
                     distance: parseInt(item.distance.toString()),
                 };
             });

@@ -39,7 +39,10 @@ export class MessageService {
 
         if (!family) throw new NotFoundException('family_not_found');
 
-        let builder = this._messageRepo.createQueryBuilder();
+        let builder = this._messageRepo
+            .createQueryBuilder('message')
+            .leftJoinAndSelect('message.user', 'user')
+            .select(['message', 'user.id', 'user.name', 'user.avt']);
 
         if (params?.filter) {
             builder.andWhere(`LOWER(content) LIKE '%${params.filter.toLowerCase()}%'`);

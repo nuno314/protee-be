@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { FamilyModule } from './modules/family/family.module';
 import { LocationModule } from './modules/location/location.module';
@@ -14,7 +15,17 @@ import { AppLoggerMiddleware } from './shared/middleware/app.logger.middleware';
 import { AppConfigService } from './shared/services/app-config.service';
 import { SharedModule } from './shared/shared.module';
 
-const modules = [SharedModule, UsersModule, AuthModule, SystemUsersModule, SeederModule, LocationModule, MessageModule, FamilyModule];
+const modules = [
+    AnalyticsModule,
+    SharedModule,
+    UsersModule,
+    AuthModule,
+    SystemUsersModule,
+    SeederModule,
+    LocationModule,
+    MessageModule,
+    FamilyModule,
+];
 @Module({
     imports: [
         ...modules,
