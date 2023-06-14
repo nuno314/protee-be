@@ -105,7 +105,7 @@ export class FamilyService {
         if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_get_request');
         const request = await this._joinFamilyRequestRepository.find({
             where: { familyId: member.familyId },
-            select: { createdBy: true,id:true },
+            select: { createdBy: true, id: true },
             relations: {
                 user: true,
             },

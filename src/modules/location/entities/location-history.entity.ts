@@ -4,8 +4,8 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { LocationEntity } from './location.entity';
 
-@Entity({ name: 'location_access_history', synchronize: true })
-export class LocationAccessHistoryEntity extends AbstractEntity {
+@Entity({ name: 'location_history', synchronize: true })
+export class LocationHistoryEntity extends AbstractEntity {
     @AutoMap()
     @Column({ type: 'uuid', nullable: true })
     userId: string;
