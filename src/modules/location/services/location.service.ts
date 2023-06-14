@@ -160,13 +160,17 @@ export class LocationService {
                 }
             });
             const result = await queryBuilder.getMany();
+            console.log(result);
             const users = await this._userService.getUsersById(result.map((temp) => temp.createdBy));
             return result.map((location) => {
                 return {
                     ...location,
-                    user: users.filter((value) => {
-                        return value.id == location.createdBy;
-                    })[0],
+                    lat: Number(location.lat),
+                    long: Number(location.long),
+                    user:
+                        users.filter((value) => {
+                            return value.id == location.createdBy;
+                        })[0] || null,
                 };
             });
         } catch (err) {
