@@ -45,10 +45,10 @@ export class MessageService {
             .select(['message', 'user.id', 'user.name', 'user.avt']);
 
         if (params?.filter) {
-            builder.andWhere(`LOWER(content) LIKE '%${params.filter.toLowerCase()}%'`);
+            builder.andWhere(`LOWER(message.content) LIKE '%${params.filter.toLowerCase()}%'`);
         }
 
-        builder = builder.skip(params.skip).take(params.take).orderBy('created_at', 'DESC');
+        builder = builder.skip(params.skip).take(params.take).orderBy('message.created_at', 'DESC');
 
         try {
             const [result, total] = await builder.getManyAndCount();
