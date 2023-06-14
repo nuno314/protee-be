@@ -39,5 +39,5 @@ export class LocationEntity extends AbstractEntity {
     icon: string;
 
     @OneToMany(() => LocationAccessHistoryEntity, (history) => history.location)
-    accessHistory: LocationAccessHistoryEntity;
+    accessHistory: LocationAccessHistoryEntity[];
 }

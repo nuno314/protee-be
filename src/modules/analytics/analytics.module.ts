@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { SharedModule } from '../../shared/shared.module';
 import { FamilyModule } from '../family/family.module';
 import { LocationModule } from '../location/location.module';
+import { UsersModule } from '../users/users.module';
 import { AnalyticsController } from './controllers/analytics.controller';
 import { AnalyticsService } from './services/analytics.service';
 
@@ -12,4 +13,4 @@ import { AnalyticsService } from './services/analytics.service';
     providers: [AnalyticsService],
     exports: [AnalyticsService],
 })
-export class UsersModule {}
+export class AnalyticsModule {}

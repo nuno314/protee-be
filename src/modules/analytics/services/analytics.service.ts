@@ -1,14 +1,14 @@
 import { BadGatewayException, Inject, Injectable } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { FamilyEntity } from '../../family/entities/family.entity';
+import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
 import { LocationEntity } from '../../location/entities/location.entity';
+import { LocationAccessHistoryEntity } from '../../location/entities/location-access-history.entity';
 import { LocationStatusEnum } from '../../location/enums/location-status.enum';
 import { UserEntity } from '../../users/entities/users.entity';
-import { REQUEST } from '@nestjs/core';
-import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
-import { LocationAccessHistoryEntity } from '../../location/entities/location-access-history.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -32,8 +32,8 @@ export class AnalyticsService {
         const response = {
             numberMembers: await this._familyMemberRepository.createQueryBuilder().where({ familyId: memberInfor.familyId }).getCount(),
             numberLocations: await this._locationRepository.createQueryBuilder().where({ familyId: memberInfor.familyId }).getCount(),
-            numberWarningTimes: await this._locationAccessHistoryEntity.createQueryBuilder('log').where({ })
-        } 
+            // numberWarningTimes: await this._locationAccessHistoryEntity.createQueryBuilder('log').where({ })
+        };
     }
 
     public async getNumberUserByAdmin(): Promise<number> {
