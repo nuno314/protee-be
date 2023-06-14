@@ -134,7 +134,7 @@ export class LocationService {
             throw err;
         }
     }
-    public async getPagedListByUser(params: PaginationLocationDto): Promise<LocationDto[]> {
+    public async getPagedListByUser(params: PaginationLocationDto): Promise<LocationEntity[]> {
         try {
             const queryBuilder = this._locationRepository.createQueryBuilder('location');
             const filter = params.filter ? params.filter : '';
@@ -151,14 +151,22 @@ export class LocationService {
             queryBuilder.andWhere((locations) => {
                 locations.where({ status: LocationStatusEnum.Personal, createdBy: this._req.user.id });
                 locations.orWhere({ status: LocationStatusEnum.Published });
-                locations.orWhere({ status: LocationStatusEnum.WaitingPublish, createdBy: this._req.user.id });
+                // locations.orWhere({ status: LocationStatusEnum.WaitingPublish, createdBy: this._req.user.id });
                 if (memberInformation) {
                     locations.orWhere({ status: LocationStatusEnum.Personal, familyId: memberInformation.familyId });
-                    locations.orWhere({ status: LocationStatusEnum.WaitingPublish, familyId: memberInformation.familyId });
+                    // locations.orWhere({ status: LocationStatusEnum.WaitingPublish, familyId: memberInformation.familyId });
                 }
             });
             const result = await queryBuilder.getMany();
-            return this._mapper.mapArray(result, LocationEntity, LocationDto);
+            const users = await this._userService.getUsersById(result.map((temp) => temp.createdBy));
+            return result.map((location) => {
+                return {
+                    ...location,
+                    user: users.filter((value) => {
+                        return value.id == location.createdBy;
+                    })[0],
+                };
+            });
         } catch (err) {
             console.log(err);
             throw err;

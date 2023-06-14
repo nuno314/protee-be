@@ -7,6 +7,7 @@ import { Not, Repository } from 'typeorm';
 
 import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { UtilsService } from '../../../shared/services/utils.service';
+import { LeaveFamilyUserEntity } from '../../users/entities/leave-family-response.entity';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
 import { FamilyEntity } from '../entities/family.entity';
@@ -82,7 +83,7 @@ export class FamilyService {
 
         const members = await this._familyMemberRepository.find({
             where: { familyId: member.familyId, userId: Not(user.id) },
-            select: { userId: true },
+            select: { id: true, role: true },
             relations: {
                 user: true,
             },
@@ -105,7 +106,7 @@ export class FamilyService {
         if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_get_request');
         const request = await this._joinFamilyRequestRepository.find({
             where: { familyId: member.familyId },
-            select: { createdBy: true,id:true },
+            select: { createdBy: true, id: true },
             relations: {
                 user: true,
             },
@@ -242,7 +243,7 @@ export class FamilyService {
         }
     }
 
-    public async leaveCurrentFamily(): Promise<StatusResponseDto> {
+    public async leaveCurrentFamily(): Promise<LeaveFamilyUserEntity | StatusResponseDto> {
         const member = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
 
         if (!member) throw new BadRequestException('not_a_member');
@@ -256,16 +257,24 @@ export class FamilyService {
         if (!otherMembersOfFamily.length) {
             return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
         }
+        try {
+            const otherParents = await this._familyMemberRepository.findOneBy({
+                familyId: member.familyId,
+                role: FamilyRoleEnum.Parent,
+                userId: Not(member.userId),
+            });
 
-        const otherParents = await this._familyMemberRepository.findOneBy({
-            familyId: member.familyId,
-            role: FamilyRoleEnum.Parent,
-            userId: Not(member.userId),
-        });
-
-        if (!otherParents) throw new BadRequestException('the_only_parent_cannot_leave');
-
-        return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
+            if (!otherParents) throw new BadRequestException('the_only_parent_cannot_leave');
+            await this._familyMemberRepository.softRemove(member, { data: { request: this._req } });
+            const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
+            return {
+                ...user,
+                role: null,
+            };
+        } catch (err) {
+            console.log(err);
+            return { result: false };
+        }
     }
 
     public async removeMemberFromFamily(memberId: string): Promise<StatusResponseDto> {

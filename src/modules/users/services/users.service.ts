@@ -94,4 +94,21 @@ export class UsersService {
             return null;
         }
     }
+    public async getUsersById(users: string[]): Promise<UserEntity[]> {
+        try {
+            const usersId = users.filter(function (elem, index, self) {
+                return index === self.indexOf(elem);
+            });
+            const result = this._userRepository
+                .createQueryBuilder('user')
+                .where('user.id IN (:...usersId)', {
+                    usersId: usersId,
+                })
+                .getMany();
+            return result;
+        } catch (err) {
+            console.log(err);
+            return null;
+        }
+    }
 }
