@@ -83,7 +83,7 @@ export class FamilyService {
 
         const members = await this._familyMemberRepository.find({
             where: { familyId: member.familyId, userId: Not(user.id) },
-            select: { userId: true },
+            select: { id: true, role: true },
             relations: {
                 user: true,
             },
