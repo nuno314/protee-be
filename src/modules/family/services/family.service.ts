@@ -209,11 +209,17 @@ export class FamilyService {
 
         if (!invideCodeEntity) throw new BadRequestException('invalid_code');
 
+        const family = await this._familyRepository.findOneBy({ id: invideCodeEntity.familyId });
+
+        if (!family) throw new NotFoundException('family_not_found');
+
         const memberEntity = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
 
-        const existedRequest = await this._joinFamilyRequestRepository.findOneBy({ createdBy: this._req?.user?.id });
+        const existedRequests = await this._joinFamilyRequestRepository.findBy({ createdBy: this._req?.user?.id });
 
-        if (existedRequest) throw new BadRequestException('user_has_waiting_request');
+        if (existedRequests?.length) {
+            await this._joinFamilyRequestRepository.softRemove(existedRequests);
+        }
 
         if (memberEntity) {
             const numberMemberOfCurrentFamily = await this._familyMemberRepository.countBy({ familyId: memberEntity.familyId });
