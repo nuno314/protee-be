@@ -49,7 +49,7 @@ export class MessageService {
             builder.andWhere(`LOWER(message.content) LIKE '%${params.filter.toLowerCase()}%'`);
         }
 
-        builder = builder.skip(params.skip).take(params.take).orderBy('message.created_at', 'DESC');
+        builder = builder.skip(params.skip).take(params.take).orderBy('message.createdAt', 'DESC');
 
         try {
             const result = await builder.getMany();
