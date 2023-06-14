@@ -118,7 +118,7 @@ export class LocationService {
             throw err;
         }
     }
-    public async getPagedListByAdmin(params: PaginationLocationDto): Promise<LocationDto[]> {
+    public async getPagedListByAdmin(params: PaginationLocationDto): Promise<LocationEntity[]> {
         try {
             const queryBuilder = this._locationRepository.createQueryBuilder('location');
             const filter = params.filter ? params.filter : '';
@@ -130,7 +130,18 @@ export class LocationService {
             }
 
             const result = await queryBuilder.getMany();
-            return this._mapper.mapArray(result, LocationEntity, LocationDto);
+            const users = await this._userService.getUsersById(result.map((temp) => temp.createdBy));
+            return result.map((location) => {
+                return {
+                    ...location,
+                    lat: Number(location.lat),
+                    long: Number(location.long),
+                    user:
+                        users.filter((value) => {
+                            return value.id == location.createdBy;
+                        })[0] || null,
+                };
+            });
         } catch (err) {
             console.log(err);
             throw err;
@@ -160,7 +171,6 @@ export class LocationService {
                 }
             });
             const result = await queryBuilder.getMany();
-            console.log(result);
             const users = await this._userService.getUsersById(result.map((temp) => temp.createdBy));
             return result.map((location) => {
                 return {
