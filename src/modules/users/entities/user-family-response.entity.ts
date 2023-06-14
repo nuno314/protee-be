@@ -4,7 +4,7 @@ import { Column, Entity } from 'typeorm';
 import { AbstractEntity } from '../../../common/abstract.entity';
 
 @Entity({ synchronize: true, name: 'users' })
-export class LeaveFamilyUserEntity extends AbstractEntity {
+export class FamilyUserEntity extends AbstractEntity {
     @Column({ nullable: true })
     @AutoMap()
     name: string;
