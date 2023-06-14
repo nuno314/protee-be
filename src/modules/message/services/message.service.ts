@@ -39,10 +39,11 @@ export class MessageService {
 
         if (!family) throw new NotFoundException('family_not_found');
 
-        let builder = this._messageRepo
-            .createQueryBuilder('message')
-            .leftJoinAndSelect('message.user', 'user')
-            .select(['message', 'user.id', 'user.name', 'user.avt']);
+        let builder = this._messageRepo.createQueryBuilder('message').where({ familyId: family.id });
+
+        const total = await builder.getCount();
+
+        builder = builder.leftJoinAndSelect('message.user', 'user').select(['message', 'user.id', 'user.name', 'user.avt']);
 
         if (params?.filter) {
             builder.andWhere(`LOWER(message.content) LIKE '%${params.filter.toLowerCase()}%'`);
@@ -51,7 +52,7 @@ export class MessageService {
         builder = builder.skip(params.skip).take(params.take).orderBy('message.created_at', 'DESC');
 
         try {
-            const [result, total] = await builder.getManyAndCount();
+            const result = await builder.getMany();
 
             return {
                 data: result,
