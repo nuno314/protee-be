@@ -7,9 +7,10 @@ import { Not, Repository } from 'typeorm';
 
 import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { UtilsService } from '../../../shared/services/utils.service';
-import { LeaveFamilyUserEntity } from '../../users/entities/leave-family-response.entity';
+import { FamilyUserEntity } from '../../users/entities/user-family-response.entity';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
+import { UserInviteCodeDto } from '../dtos/responses/user-invite-code.dto';
 import { FamilyEntity } from '../entities/family.entity';
 import { FamilyInviteCodeEntity } from '../entities/family-invite-code.entity';
 import { FamilyMemberEntity } from '../entities/family-member.entity';
@@ -150,7 +151,7 @@ export class FamilyService {
         }
     }
 
-    public async getFamilyInviteCode(): Promise<string> {
+    public async getFamilyInviteCode(): Promise<UserInviteCodeDto> {
         if (!this._req?.user?.id) {
             throw new UnauthorizedException();
         }
@@ -162,7 +163,13 @@ export class FamilyService {
 
         if (member) {
             const familyInviteCode = await this._familyInviteCodeRepository.findOneBy({ familyId: member.familyId });
-            return familyInviteCode.code;
+            return {
+                code: familyInviteCode.code,
+                user: {
+                    ...user,
+                    role: FamilyRoleEnum.Parent,
+                },
+            };
         }
         try {
             const familyEntity: FamilyEntity = {
@@ -194,7 +201,13 @@ export class FamilyService {
                     data: { request: this._req },
                 });
 
-                return createInviteCodeResult.code;
+                return {
+                    code: createInviteCodeResult.code,
+                    user: {
+                        ...user,
+                        role: member.role,
+                    },
+                };
             }
         } catch (err) {
             console.log(err);
@@ -243,7 +256,7 @@ export class FamilyService {
         }
     }
 
-    public async leaveCurrentFamily(): Promise<LeaveFamilyUserEntity | StatusResponseDto> {
+    public async leaveCurrentFamily(): Promise<FamilyUserEntity | StatusResponseDto> {
         const member = await this._familyMemberRepository.findOneBy({ userId: this._req?.user?.id });
 
         if (!member) throw new BadRequestException('not_a_member');
