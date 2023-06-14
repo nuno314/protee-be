@@ -11,6 +11,7 @@ import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
 import { GetNearlyLocationRequest } from '../dtos/requests/get-nearly-location.request';
 import { UpdateLocationDto } from '../dtos/requests/update-location.dto';
+import { LocationEntity } from '../entities/location.entity';
 import { LocationService } from '../services/location.service';
 
 @ApiTags('location')
@@ -34,11 +35,10 @@ export class LocationController {
     @Version('1')
     @HttpCode(HttpStatus.OK)
     @UseGuards(RolesGuard)
-    // @Roles(RolesEnum.ADMIN)
-    public async getLocationByUser(@Query() params: PaginationLocationDto): Promise<LocationDto[]> {
+    public async getLocationByUser(@Query() params: PaginationLocationDto): Promise<LocationEntity[]> {
         return await this._locationService.getPagedListByUser(params);
     }
-    @ApiOperation({ summary: 'Admin update status of  location' })
+    @ApiOperation({ summary: 'Admin update status of location' })
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Update location',
