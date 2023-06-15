@@ -323,8 +323,23 @@ export class LocationService {
     public async userRemoveLocation(locationId: string): Promise<StatusResponseDto> {
         const location = await this._locationRepository.findOneBy({ id: locationId });
         if (!location) throw new NotFoundException('location_not_found');
-        if (location.status !== LocationStatusEnum.Personal || location.createdBy !== this._req.user.id)
+        if (location.status !== LocationStatusEnum.Personal || (location.createdBy !== this._req.user.id && !location.familyId))
             throw new ForbiddenException('no_permission');
+        if (location.createdBy !== this._req.user.id) {
+            if (location.familyId) {
+                const requestMemberInfor = await this._familyService.getMemberInformationByUserId(this._req.user.id);
+                const memberCreatedLocation = await this._familyService.getMemberInformationByUserId(location.createdBy);
+                if (
+                    requestMemberInfor.role !== FamilyRoleEnum.Parent ||
+                    memberCreatedLocation.role !== FamilyRoleEnum.Child ||
+                    requestMemberInfor.familyId !== location.familyId
+                ) {
+                    throw new ForbiddenException('no_permission');
+                }
+            } else {
+                throw new ForbiddenException('no_permission');
+            }
+        }
         try {
             const result =
                 (await this._locationRepository.softRemove(location)) &&
