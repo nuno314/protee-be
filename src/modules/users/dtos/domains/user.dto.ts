@@ -8,19 +8,19 @@ export class UserDto extends AbstractDto {
     name: string;
 
     @AutoMap()
-    email: string;
+    email?: string;
 
     @AutoMap()
-    phoneNumber: string;
+    phoneNumber?: string;
 
     @AutoMap()
-    isActive: boolean;
+    isActive?: boolean;
 
     @AutoMap()
-    dob: Date;
+    dob?: Date;
 
     @AutoMap()
-    avt: string;
+    avt?: string;
 
     familyRole?: FamilyRoleEnum;
     familyId?: string;

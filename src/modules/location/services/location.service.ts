@@ -74,12 +74,18 @@ export class LocationService {
                     page: 0,
                 };
 
-            const locationHistoryIds = data.map((x) => x.userLocationHistoryId);
-            const userLocationHistories = await this._userLocationHistoryRepository.findBy({ id: In(locationHistoryIds) });
+            const locationIds = data.map((x) => x.locationId);
+            const locations = await this._locationRepository.find({
+                where: { id: In(locationIds) },
+                select: { name: true, lat: true, long: true, id: true, description: true, icon: true },
+            });
 
             data.map((x) => {
-                x.userLocationHistory = userLocationHistories.find((y) => y.id === x.userLocationHistoryId);
-                x.user = targetUserInfor;
+                x.user = {
+                    name: targetUserInfor.name,
+                    avt: targetUserInfor.avt,
+                };
+                x.location = locations.find((y) => y.id === x.locationId);
             });
 
             return {
