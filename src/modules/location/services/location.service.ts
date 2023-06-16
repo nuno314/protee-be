@@ -56,10 +56,16 @@ export class LocationService {
         if (!targetUserInfor) throw new NotFoundException('user_not_found');
 
         try {
-            const builder = this._locationAccessHistoryRepository
-                .createQueryBuilder('access')
-                .where({ createdBy: request.userId, createdAt: MoreThanOrEqual(moment(request.fromDate).startOf('day').format()) })
-                .andWhere({ createdAt: LessThanOrEqual(moment(request.toDate).endOf('day').format()) })
+            let builder = this._locationAccessHistoryRepository.createQueryBuilder('access').where({ createdBy: request.userId });
+
+            if (request.fromDate) {
+                builder = builder.andWhere({ createdAt: MoreThanOrEqual(moment(request.fromDate).startOf('day').format()) });
+            }
+            if (request.toDate) {
+                builder = builder.andWhere({ createdAt: LessThanOrEqual(moment(request.toDate).endOf('day').format()) });
+            }
+
+            builder = builder
                 .leftJoinAndSelect('access.userLocationHistory', 'history')
                 .where(`history.family_id = :familyId`, { familyId: targetMemberInfor?.familyId })
                 .skip(request.skip)

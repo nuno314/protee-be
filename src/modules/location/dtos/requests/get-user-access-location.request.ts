@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 import { PaginationRequestDto } from '../../../../common/dto/pagination-request.dto';
 
@@ -10,12 +10,12 @@ export class GetUserAccessLocationHistoryRequest extends PaginationRequestDto {
     userId: string;
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsDateString()
     fromDate: string;
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @IsDateString()
     toDate: string;
 }
