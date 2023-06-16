@@ -14,6 +14,7 @@ import { AppConfigService } from '../../../shared/services/app-config.service';
 import { FamilyRoleEnum } from '../../family/enums/family-role.enum';
 import { FamilyService } from '../../family/services/family.service';
 import { ChatGateway } from '../../message/gateway/chat.gateway';
+import { SettingsService } from '../../settings/services/settings.service';
 import { UsersService } from '../../users/services/users.service';
 import { LocationDto } from '../dtos/domains/location.dto';
 import { CreateLocationDto } from '../dtos/requests/create-location.dto';
@@ -38,7 +39,8 @@ export class LocationService {
         private readonly _socketGateway: ChatGateway,
         private readonly _userService: UsersService,
         @InjectRepository(UserLocationHistoryEntity)
-        private readonly _userLocationHistoryRepository: Repository<UserLocationHistoryEntity>
+        private readonly _userLocationHistoryRepository: Repository<UserLocationHistoryEntity>,
+        private readonly _settingsService: SettingsService
     ) {}
 
     public async getUserAccessLocationHistory(
@@ -124,7 +126,8 @@ export class LocationService {
     }
 
     public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
-        const radius = Number(this._configService.get('RADIUS')) || 500; // In meters
+        const radiusSettings = await this._settingsService.getRadiusSetting();
+        const radius = Number(radiusSettings?.data) || 500; // In meters
         const userId = this._req.user.id;
         const memberInformation = await this._familyService.getMemberInformationByUserId(userId);
         const locations: LocationEntity[] = await this._locationRepository.query(

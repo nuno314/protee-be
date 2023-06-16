@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FamilyModule } from './modules/family/family.module';
 import { LocationModule } from './modules/location/location.module';
 import { MessageModule } from './modules/message/message.module';
+import { SettingsModule } from './modules/settings/settings.module';
 import { SystemUsersModule } from './modules/system-users/system-users.module';
 import { UsersModule } from './modules/users/users.module';
 import { SeederModule } from './seeder/seeder.module';
@@ -25,6 +26,7 @@ const modules = [
     LocationModule,
     MessageModule,
     FamilyModule,
+    SettingsModule,
 ];
 @Module({
     imports: [

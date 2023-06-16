@@ -15,9 +15,7 @@ import { SeederService } from './seeder.service';
             inject: [AppConfigService],
         }),
     ],
-    providers: [
-        SeederService,
-    ],
+    providers: [SeederService],
     exports: [SeederService],
 })
 export class SeederModule {}
