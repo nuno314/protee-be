@@ -2,6 +2,7 @@ import { AutoMap } from '@automapper/classes';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractEntity } from '../../../common/abstract.entity';
+import { UserDto } from '../../users/dtos/domains/user.dto';
 import { LocationEntity } from './location.entity';
 import { UserLocationHistoryEntity } from './user-location-history.entity';
 
@@ -26,4 +27,6 @@ export class LocationAccessHistoryEntity extends AbstractEntity {
     @ManyToOne(() => UserLocationHistoryEntity, (location) => location.accessHistory)
     @JoinColumn({ name: 'user_location_history_id' })
     userLocationHistory?: UserLocationHistoryEntity;
+
+    user?: UserDto;
 }

@@ -50,6 +50,9 @@ export class LocationService {
         const targetMemberInfor = await this._familyService.getMemberInformationByUserId(request.userId);
         if (requestMemberInfor?.familyId !== targetMemberInfor?.familyId) throw new ForbiddenException();
 
+        const targetUserInfor = await this._userService.getById(request.userId);
+        if (!targetUserInfor) throw new NotFoundException('user_not_found');
+
         try {
             const builder = this._locationAccessHistoryRepository
                 .createQueryBuilder('access')
@@ -76,6 +79,7 @@ export class LocationService {
 
             data.map((x) => {
                 x.userLocationHistory = userLocationHistories.find((y) => y.id === x.userLocationHistoryId);
+                x.user = targetUserInfor;
             });
 
             return {
