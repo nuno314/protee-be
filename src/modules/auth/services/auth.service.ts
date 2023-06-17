@@ -215,7 +215,7 @@ export class AuthService {
                 throw new InternalServerErrorException();
             }
 
-            const url = `${this._configService.get('PORTAL_URL')}/reset-password/${secretKey}`;
+            const url = `${this._configService.get('PORTAL_URL')}/auth/reset-password/${secretKey}`;
             this._mailService.sendResetPassword(user.email, url);
             return true;
         } catch (err) {
