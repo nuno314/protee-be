@@ -93,7 +93,17 @@ export class LocationService {
                     name: targetUserInfor.name,
                     avt: targetUserInfor.avt,
                 };
+                x.userLocationHistory = {
+                    ...x.userLocationHistory,
+                    currentLat: Number(x.userLocationHistory?.currentLat),
+                    currentLong: Number(x.userLocationHistory?.currentLong),
+                };
                 x.location = locations.find((y) => y.id === x.locationId);
+                x.location = {
+                    ...x.location,
+                    lat: Number(x.location?.lat),
+                    long: Number(x.location?.long),
+                };
             });
 
             return {
