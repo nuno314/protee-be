@@ -63,10 +63,12 @@ export class LocationService {
                 .where(`access.createdBy = '${request.userId}'`)
                 .andWhere(`history.family_id = '${targetMemberInfor?.familyId}'`);
             if (request.fromDate) {
-                builder = builder.andWhere(`access.createdAt >= '${moment(request.fromDate).startOf('day').format()}'`);
+                builder = builder.andWhere(`access.createdAt >= '${request.fromDate}'`);
+                // builder = builder.andWhere(`access.createdAt >= '${moment(request.fromDate).startOf('day').format()}'`);
             }
             if (request.toDate) {
-                builder = builder.andWhere(`access.createdAt <= '${moment(request.toDate).endOf('day').format()}'`);
+                builder = builder.andWhere(`access.createdAt <= '${request.toDate}'`);
+                // builder = builder.andWhere(`access.createdAt <= '${moment(request.toDate).endOf('day').format()}'`);
             }
             builder = builder.skip(request.skip).take(request.take).orderBy('access.createdAt', 'DESC');
 
