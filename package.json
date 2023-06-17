@@ -93,6 +93,7 @@
         "nodemailer": "^6.7.2",
         "npm": "^8.2.0",
         "object-sizeof": "^1.6.3",
+        "onesignal-node": "^3.4.0",
         "papaparse": "^5.3.2",
         "passport": "^0.5.0",
         "passport-firebase-jwt": "^1.2.1",
