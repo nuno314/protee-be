@@ -1,8 +1,0 @@
-<mj-section padding="10px 16px 0 16px">
-  <mj-column>
-    <mj-text align="left" padding="0">
-      <h2 class="heading">Xin chào <span class="blue-text">{{name}}</span></h2>
-      <p> Cám ơn bạn đã đăng ký Color Man Food </p>
-    </mj-text>
-  </mj-column>
-</mj-section>

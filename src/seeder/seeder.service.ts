@@ -38,7 +38,7 @@ export class SeederService implements OnModuleInit {
 
     public async seedSystemAdmin(): Promise<boolean> {
         try {
-            const adminEmail = 'protee@gmail.com';
+            const adminEmail = 'protee.hcmus@gmail.com';
             const existedSystemAdmin = await this._systemUserRepository.findOneBy({ email: adminEmail });
 
             if (existedSystemAdmin) {

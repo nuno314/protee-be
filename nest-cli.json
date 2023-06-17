@@ -1,4 +1,15 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "src",
+  "compilerOptions": {
+      "plugins": ["@nestjs/swagger/plugin"],
+      "assets": [
+          { "include": "i18n/**/*", "outDir": "dist/src/" },
+          { "include": "templates/**/*.hbs", "outDir": "dist/src/" },
+          { "include": "templates/**/*.json", "outDir": "dist/src/" },
+          { "include": "views/**/*.hbs", "outDir": "dist/src/" },
+          { "include": "seeder/**/*.json", "outDir": "dist/src/" },
+          { "include": "shared/templates/**/*.mjml", "outDir": "dist/src/" }
+      ]
+  }
 }
