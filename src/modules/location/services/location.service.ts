@@ -70,7 +70,10 @@ export class LocationService {
                 builder = builder.andWhere(`access.createdAt <= '${request.toDate}'`);
                 // builder = builder.andWhere(`access.createdAt <= '${moment(request.toDate).endOf('day').format()}'`);
             }
-            builder = builder.skip(request.skip).take(request.take).orderBy('access.createdAt', 'DESC');
+            builder = builder
+                .skip(request.skip || (Number(request.page) - 1) * Number(request.take))
+                .take(request.take)
+                .orderBy('access.createdAt', 'DESC');
 
             const [data, total] = await builder.getManyAndCount();
 

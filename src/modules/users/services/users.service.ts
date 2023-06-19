@@ -68,7 +68,7 @@ export class UsersService {
             const sortField: FindOptionsOrder<UserEntity> = {};
             sortField[request.sortField] = request.order;
 
-            queryBuilder.skip(request.skip).take(request.take);
+            queryBuilder.skip(request.skip || (Number(request.page) - 1) * Number(request.take)).take(request.take);
             queryBuilder.orderBy(request.sortField, request.order === 'ASC' ? 'ASC' : 'DESC');
 
             const [result, total] = await queryBuilder.getManyAndCount();

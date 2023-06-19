@@ -45,18 +45,18 @@ export class MessageService {
 
         let builder = this._messageRepo.createQueryBuilder('message').where({ familyId: family.id });
 
-        const total = await builder.getCount();
-
         builder = builder.leftJoinAndSelect('message.user', 'user').select(['message', 'user.id', 'user.name', 'user.avt']);
 
         if (params?.filter) {
             builder.andWhere(`LOWER(message.content) LIKE '%${params.filter.toLowerCase()}%'`);
         }
 
-        builder = builder.skip(params.skip).take(params.take).orderBy('message.createdAt', 'DESC');
-
         try {
-            const result = await builder.getMany();
+            const [result, total] = await builder
+                .skip(params.skip || (Number(params.page) - 1) * Number(params.take))
+                .take(params.take)
+                .orderBy('message.createdAt', 'DESC')
+                .getManyAndCount();
 
             return {
                 data: result,

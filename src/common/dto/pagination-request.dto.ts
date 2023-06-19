@@ -34,6 +34,6 @@ export class PaginationRequestDto {
     order = 'ASC' || 'DESC';
 
     get skip(): number {
-        return (this.page - 1) * this.take;
+        return (Number(this.page) - 1) * Number(this.take);
     }
 }
