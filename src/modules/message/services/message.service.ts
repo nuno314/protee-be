@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { PaginationRequestDto } from '../../../common/dto/pagination-request.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
 import { FamilyService } from '../../family/services/family.service';
+import { UserEntity } from '../../users/entities/users.entity';
+import { UsersService } from '../../users/services/users.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { MessageEntity } from '../entities/message.entity';
 import { ChatGateway } from '../gateway/chat.gateway';
@@ -17,7 +19,8 @@ export class MessageService {
         private _messageRepo: Repository<MessageEntity>,
         @Inject(REQUEST) private readonly _req,
         private readonly _familyService: FamilyService,
-        private readonly _chatGateway: ChatGateway
+        private readonly _chatGateway: ChatGateway,
+        private readonly _usersService: UsersService
     ) {}
     async createMessage(params: CreateMessageDto): Promise<MessageEntity> {
         const family = await this._familyService.getFamilyByUserId(this._req.user.id);
@@ -30,6 +33,7 @@ export class MessageService {
             createdBy: this._req.user.id,
         };
         const sendResult = await this._messageRepo.save(message, { data: { request: this._req } });
+        message.user = (await this._usersService.getById(this._req.user.id)) as UserEntity;
         await this._chatGateway.emitMessageToRoom(sendResult, family.id);
         return sendResult;
     }

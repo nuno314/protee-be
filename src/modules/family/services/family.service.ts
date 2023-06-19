@@ -167,7 +167,7 @@ export class FamilyService {
                 code: familyInviteCode.code,
                 user: {
                     ...user,
-                    role: FamilyRoleEnum.Parent,
+                    familyRole: FamilyRoleEnum.Parent,
                 },
             };
         }
@@ -205,7 +205,7 @@ export class FamilyService {
                     code: createInviteCodeResult.code,
                     user: {
                         ...user,
-                        role: member.role,
+                        familyRole: member.role,
                     },
                 };
             }
@@ -288,7 +288,7 @@ export class FamilyService {
             const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
             return {
                 ...user,
-                role: null,
+                familyRole: null,
             };
         } catch (err) {
             console.log(err);

@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppConfigService } from '../../shared/services/app-config.service';
 import { FamilyModule } from '../family/family.module';
+import { UsersModule } from '../users/users.module';
 import { MessageController } from './controllers/message.controller';
 import { MessageEntity } from './entities/message.entity';
 import { ChatGateway } from './gateway/chat.gateway';
@@ -20,6 +21,7 @@ import { MessageService } from './services/message.service';
                 signOptions: { expiresIn: '24h' },
             }),
         }),
+        UsersModule,
         ConfigModule.forRoot(),
         FamilyModule,
         TypeOrmModule.forFeature([MessageEntity]),
