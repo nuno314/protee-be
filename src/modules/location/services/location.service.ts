@@ -124,7 +124,7 @@ export class LocationService {
         }
     }
 
-    public async getUserLastLocation(userId: string): Promise<UserLocationHistoryEntity> {
+    public async getUserLastLocation(userId: string): Promise<{ result: UserLocationHistoryEntity }> {
         const requestMemberInfor = await this._familyService.getMemberInformationByUserId(this._req.user.id);
         if (requestMemberInfor?.role !== FamilyRoleEnum.Parent) throw new ForbiddenException();
 
@@ -137,11 +137,11 @@ export class LocationService {
             .orderBy('created_at', 'DESC')
             .getOne();
 
-        if (!result) return null;
+        if (!result) return { result: null };
 
         const targetUserInfor = await this._userService.getById(userId);
         result.user = targetUserInfor;
-        return result;
+        return { result: result };
     }
 
     public async getNearlyLocation(latitude: number, longitude: number): Promise<LocationDto[]> {
@@ -167,7 +167,6 @@ export class LocationService {
             order by distance`
         );
 
-        if (!locations.length) return [];
         try {
             const userLocationHistoryDto: UserLocationHistoryEntity = {
                 currentLat: latitude,
@@ -179,22 +178,26 @@ export class LocationService {
             const userLocationHistory = await this._userLocationHistoryRepository.save(userLocationHistoryDto, {
                 data: { request: this._req },
             });
-            const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
-                return {
-                    createdBy: userId,
-                    locationId: item.id,
-                    userLocationHistoryId: userLocationHistory.id,
-                    distance: parseInt(item.distance.toString()),
-                };
-            });
+            if (locations.length) {
+                const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
+                    return {
+                        createdBy: userId,
+                        locationId: item.id,
+                        userLocationHistoryId: userLocationHistory.id,
+                        distance: parseInt(item.distance.toString()),
+                    };
+                });
 
-            await this._locationAccessHistoryRepository.save(accessHistoryItems, {
-                data: { request: this._req },
-            });
+                await this._locationAccessHistoryRepository.save(accessHistoryItems, {
+                    data: { request: this._req },
+                });
+            }
             const user = await this._userService.getById(userId);
+
             const noti = {
                 user,
-                locations,
+                dangerousLocations: locations,
+                currentLocation: userLocationHistory,
             };
             this._socketGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
         } catch (e) {

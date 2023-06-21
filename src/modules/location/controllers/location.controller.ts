@@ -29,7 +29,7 @@ export class LocationController {
     @Get('/user/last-location/:userId')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    public async getUserLastLocation(@Param('userId') userId: string): Promise<UserLocationHistoryEntity> {
+    public async getUserLastLocation(@Param('userId') userId: string): Promise<{ result: UserLocationHistoryEntity }> {
         return await this._locationService.getUserLastLocation(userId);
     }
     @ApiOperation({ summary: 'Get locations for admin' })

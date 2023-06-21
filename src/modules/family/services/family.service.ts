@@ -167,7 +167,7 @@ export class FamilyService {
                 code: familyInviteCode.code,
                 user: {
                     ...user,
-                    familyRole: FamilyRoleEnum.Parent,
+                    familyRole: member.role,
                 },
             };
         }
@@ -178,14 +178,14 @@ export class FamilyService {
             };
             const createFamilyResult = await this._familyRepository.save(familyEntity, { data: { request: this._req } });
 
-            const member: FamilyMemberEntity = {
+            const createMember: FamilyMemberEntity = {
                 familyId: createFamilyResult.id,
                 userId: user.id,
                 role: FamilyRoleEnum.Parent,
                 createdBy: this._req.user.id,
             };
 
-            const createMemberResult = await this._familyMemberRepository.save(member, { data: { request: this._req } });
+            const createMemberResult = await this._familyMemberRepository.save(createMember, { data: { request: this._req } });
 
             let isExistedCode = true;
             while (isExistedCode) {
@@ -205,7 +205,7 @@ export class FamilyService {
                     code: createInviteCodeResult.code,
                     user: {
                         ...user,
-                        familyRole: member.role,
+                        familyRole: createMember.role,
                     },
                 };
             }
