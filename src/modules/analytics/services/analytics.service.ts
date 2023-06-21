@@ -9,6 +9,7 @@ import { LocationEntity } from '../../location/entities/location.entity';
 import { UserLocationHistoryEntity } from '../../location/entities/user-location-history.entity';
 import { LocationStatusEnum } from '../../location/enums/location-status.enum';
 import { UserEntity } from '../../users/entities/users.entity';
+import { StatisticUserDto } from '../dtos/responses/statistic.user.dto';
 
 @Injectable()
 export class AnalyticsService {
@@ -64,5 +65,14 @@ export class AnalyticsService {
 
     public async getNumberLocationByAdmin(): Promise<number> {
         return await this._locationRepository.createQueryBuilder().where({ status: LocationStatusEnum.Published }).getCount();
+    }
+    public async getStatisticUserByAdmin(): Promise<StatisticUserDto[]> {
+        const result: StatisticUserDto[] = await this._userRepository.query(
+            `SELECT count(*) as quantity, to_char(created_at, 'YYYY-MM') as time
+                 FROM users 
+                GROUP BY to_char(created_at, 'YYYY-MM')
+                ORDER BY to_char(created_at, 'YYYY-MM')`
+        );
+        return result;
     }
 }

@@ -11,6 +11,7 @@ import { Roles } from '../../../decorators/role.decorator';
 import { RolesEnum } from '../../../common/enums/roles.enum';
 
 import { AnalyticsService } from '../services/analytics.service';
+import { StatisticUserDto } from '../dtos/responses/statistic.user.dto';
 
 @Controller('analytics')
 @ApiTags('analytics')
@@ -56,6 +57,14 @@ export class AnalyticsController extends BaseController {
     public async getNumberLocation(): Promise<number> {
         return await this._analytics.getNumberLocationByAdmin();
     }
-
+    @ApiOperation({ summary: 'Get statistics user ' })
+    @Get('admin/statistic-user')
+    @Version('1')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RolesEnum.ADMIN)
+    public async getNumberOfUserMonthly(): Promise<StatisticUserDto[]> {
+        return await this._analytics.getStatisticUserByAdmin();
+    }
     // For Users
 }
