@@ -168,6 +168,7 @@ export class FamilyService {
                 user: {
                     ...user,
                     familyRole: member.role,
+                    familyId: member.familyId,
                 },
             };
         }
@@ -206,6 +207,7 @@ export class FamilyService {
                     user: {
                         ...user,
                         familyRole: createMember.role,
+                        familyId: createMember.familyId,
                     },
                 };
             }

@@ -9,4 +9,5 @@ export class FamilyUserDto extends AbstractDto {
     isActive: boolean;
     dob: Date;
     familyRole: string;
+    familyId?: string;
 }

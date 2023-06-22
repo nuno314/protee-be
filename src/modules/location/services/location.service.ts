@@ -178,6 +178,13 @@ export class LocationService {
             const userLocationHistory = await this._userLocationHistoryRepository.save(userLocationHistoryDto, {
                 data: { request: this._req },
             });
+            const user = await this._userService.getById(userId);
+
+            const noti: any = {
+                user,
+                currentLocation: userLocationHistory,
+            };
+            this._socketGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
             if (locations.length) {
                 const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
                     return {
@@ -191,15 +198,9 @@ export class LocationService {
                 await this._locationAccessHistoryRepository.save(accessHistoryItems, {
                     data: { request: this._req },
                 });
+                noti.dangerousLocations = locations;
+                this._socketGateway.emitWarningToRoom(noti, `parent_${memberInformation.familyId}`);
             }
-            const user = await this._userService.getById(userId);
-
-            const noti = {
-                user,
-                dangerousLocations: locations,
-                currentLocation: userLocationHistory,
-            };
-            this._socketGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
         } catch (e) {
             console.log(e);
         }

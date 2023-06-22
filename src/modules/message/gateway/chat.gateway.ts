@@ -55,6 +55,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(room).emit('notification', noti);
     }
 
+    async emitWarningToRoom(noti: any, room: string): Promise<void> {
+        this.server.to(room).emit('warning', noti);
+    }
+
     handleDisconnect(socket: Socket): void {
         socket.disconnect();
     }
