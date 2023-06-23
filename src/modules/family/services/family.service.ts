@@ -307,6 +307,8 @@ export class FamilyService {
 
         if (!needToDeleteMember) throw new NotFoundException('member_not_found');
 
+        if (requestMember.id === memberId) throw new ForbiddenException('cannot_delete_yourself');
+
         return { result: !!(await this._familyMemberRepository.softRemove(needToDeleteMember, { data: { request: this._req } })) };
     }
     public async updateChildToParent(memberId: string): Promise<StatusResponseDto> {

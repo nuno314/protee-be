@@ -54,7 +54,6 @@ export class LocationController {
     @Get('/user')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    @UseGuards(RolesGuard)
     public async getLocationByUser(@Query() params: PaginationLocationDto): Promise<LocationEntity[]> {
         return await this._locationService.getPagedListByUser(params);
     }
@@ -79,10 +78,10 @@ export class LocationController {
     @Put('/user')
     @Version('1')
     @HttpCode(HttpStatus.OK)
-    @UseGuards(RolesGuard)
     public async publishLocationByUser(@Body() body: { locationId: string }): Promise<StatusResponseDto> {
         return await this._locationService.userPublishLocation(body.locationId);
     }
+
     @ApiOperation({ summary: 'Create a location' })
     @ApiResponse({
         status: HttpStatus.OK,

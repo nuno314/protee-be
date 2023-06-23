@@ -30,6 +30,11 @@ export class AnalyticsService {
     public async getBasicFamilyAnalytics(): Promise<any> {
         const memberInfor = await this._familyMemberRepository.findOneBy({ userId: this._req.user.id });
         if (!memberInfor) throw new BadGatewayException('not_a_family_member');
+        const numberWarningTimesData = await this._userLocationHistoryRepository.query(`select count(c) as count from (
+            select count(*) as c
+            from location_access_history
+            group by user_location_history_id
+        ) as temp`);
         const response = {
             numberMembers: await this._familyMemberRepository.createQueryBuilder().where({ familyId: memberInfor.familyId }).getCount(),
             numberLocations: await this._locationRepository
@@ -37,20 +42,7 @@ export class AnalyticsService {
                 .where({ familyId: memberInfor.familyId })
                 .orWhere({ status: LocationStatusEnum.Published })
                 .getCount(),
-            numberWarningTimes: Number(
-                (
-                    await this._userLocationHistoryRepository.query(`SELECT count(*)
-            FROM user_location_history AS u
-            INNER JOIN location_access_history AS p ON p.id = (
-                SELECT id
-                FROM location_access_history AS p2
-                WHERE p2.user_location_history_id = u.id
-                ORDER BY p.created_at DESC
-                LIMIT 1
-            )
-            where p.id IS NOT NULL`)
-                )[0]?.count || 0
-            ),
+            numberWarningTimes: Number(numberWarningTimesData[0]?.count) || 0,
         };
         return response;
     }
