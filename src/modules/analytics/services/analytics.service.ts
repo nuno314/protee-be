@@ -30,9 +30,19 @@ export class AnalyticsService {
     public async getBasicFamilyAnalytics(): Promise<any> {
         const memberInfor = await this._familyMemberRepository.findOneBy({ userId: this._req.user.id });
         if (!memberInfor) throw new BadGatewayException('not_a_family_member');
+        const allMembers = await this._familyMemberRepository.findBy({ familyId: memberInfor.familyId });
+        let allMemberIds = '';
+        (allMembers || []).forEach((x, index) => {
+            if (index !== allMembers?.length - 1) {
+                allMemberIds += `'${x.userId}',`;
+            } else {
+                allMemberIds += `'${x.userId}'`;
+            }
+        });
         const numberWarningTimesData = await this._userLocationHistoryRepository.query(`select count(c) as count from (
             select count(*) as c
             from location_access_history
+            where created_by IN(${allMemberIds})
             group by user_location_history_id
         ) as temp`);
         const response = {
