@@ -179,6 +179,7 @@ export class LocationService {
                 data: { request: this._req },
             });
             const user = await this._userService.getById(userId);
+            userLocationHistory.user = user;
 
             const noti: any = {
                 user,
@@ -186,6 +187,20 @@ export class LocationService {
             };
             this._socketGateway.emitNotificationToRoom(noti, `parent_${memberInformation.familyId}`);
             if (locations.length) {
+                // const ids = locations.map((i) => i.id);
+                // const point = moment().subtract(3, 'minutes').format();
+
+                // const recentWarningLocation = await this._locationAccessHistoryRepository
+                //     .createQueryBuilder()
+                //     .where({ locationId: In(ids), createdAt: MoreThanOrEqual(point) })
+                //     .getMany();
+
+                // const recentWarningLocationIds = (recentWarningLocation || []).map((x) => x.locationId);
+
+                // const needWarningLocations = locations.filter((x) => !recentWarningLocationIds.includes(x.id));
+
+                // if (needWarningLocations?.length) {
+                // }
                 const accessHistoryItems: LocationAccessHistoryEntity[] = (locations || []).map((item) => {
                     return {
                         createdBy: userId,
