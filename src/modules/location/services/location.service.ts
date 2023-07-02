@@ -14,6 +14,9 @@ import { AppConfigService } from '../../../shared/services/app-config.service';
 import { FamilyRoleEnum } from '../../family/enums/family-role.enum';
 import { FamilyService } from '../../family/services/family.service';
 import { ChatGateway } from '../../message/gateway/chat.gateway';
+import { CreateNotificationDto } from '../../notification/dto/requests';
+import { NotificationTypeEnum } from '../../notification/enums/notification-type.enum';
+import { NotificationService } from '../../notification/services/notification.service';
 import { SettingsService } from '../../settings/services/settings.service';
 import { UsersService } from '../../users/services/users.service';
 import { LocationDto } from '../dtos/domains/location.dto';
@@ -40,7 +43,8 @@ export class LocationService {
         private readonly _userService: UsersService,
         @InjectRepository(UserLocationHistoryEntity)
         private readonly _userLocationHistoryRepository: Repository<UserLocationHistoryEntity>,
-        private readonly _settingsService: SettingsService
+        private readonly _settingsService: SettingsService,
+        private readonly _notificationService: NotificationService
     ) {}
 
     public async getUserAccessLocationHistory(
@@ -248,6 +252,33 @@ export class LocationService {
             const location = await this._locationRepository.save(createLocationDto, {
                 data: { request: this._req },
             });
+            if (location.familyId) {
+                const allMembers = await this._familyService.getFamilyMembers();
+                const actor = allMembers.find((x) => x.userId === this._req.user.id);
+                allMembers.forEach((mem) => {
+                    if (mem.userId !== this._req.user.id) {
+                        const notiRequest: CreateNotificationDto = {
+                            title: `${actor.user?.name} đã thêm ${location.name} vào vị trí nguy hiểm`,
+                            content: '',
+                            isRead: false,
+                            type: NotificationTypeEnum.AddLocation,
+                            userId: mem.userId,
+                            familyId: mem.familyId,
+                            data: {
+                                locationId: location.id,
+                                locationName: location.name,
+                                createdByUserId: this._req.user.id,
+                                createdByUser: {
+                                    name: actor.user?.name,
+                                    id: actor.user?.id,
+                                    avt: actor.user?.avt,
+                                },
+                            },
+                        };
+                        this._notificationService.create(notiRequest);
+                    }
+                });
+            }
             return this._mapper.map(location, LocationEntity, LocationDto);
         } catch (err) {
             console.log(err);

@@ -7,6 +7,9 @@ import { Not, Repository } from 'typeorm';
 
 import { StatusResponseDto } from '../../../common/dto/status-response.dto';
 import { UtilsService } from '../../../shared/services/utils.service';
+import { CreateNotificationDto } from '../../notification/dto/requests';
+import { NotificationTypeEnum } from '../../notification/enums/notification-type.enum';
+import { NotificationService } from '../../notification/services/notification.service';
 import { FamilyUserDto } from '../../users/dtos/responses/user-family-response.dto';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
@@ -31,7 +34,8 @@ export class FamilyService {
         private readonly _familyInviteCodeRepository: Repository<FamilyInviteCodeEntity>,
         @InjectRepository(JoinFamilyRequestEntity)
         private readonly _joinFamilyRequestRepository: Repository<JoinFamilyRequestEntity>,
-        @InjectMapper() private readonly _mapper: Mapper
+        @InjectMapper() private readonly _mapper: Mapper,
+        private readonly _notificationService: NotificationService
     ) {}
 
     public async getMemberInformationByUserId(userId: string): Promise<FamilyMemberEntity> {
@@ -257,6 +261,27 @@ export class FamilyService {
             };
 
             const createRequestResult = await this._joinFamilyRequestRepository.save(request, { data: { request: this._req } });
+            const allParents = await this._familyMemberRepository.findBy({ familyId: family.id, role: FamilyRoleEnum.Parent });
+            const user = await this._userRepository.findOneBy({ id: this._req.user.id });
+            allParents.forEach((parent) => {
+                const notiRequest: CreateNotificationDto = {
+                    title: `${user?.name} đã yêu cầu tham gia gia đình`,
+                    content: '',
+                    isRead: false,
+                    type: NotificationTypeEnum.JoinRequest,
+                    userId: parent.userId,
+                    familyId: family.id,
+                    data: {
+                        requestId: createRequestResult.id,
+                        createdByUser: {
+                            name: user?.name,
+                            id: user?.id,
+                            avt: user?.avt,
+                        },
+                    },
+                };
+                this._notificationService.create(notiRequest);
+            });
             return { result: !!createRequestResult };
         } catch (err) {
             console.log(err);
@@ -288,6 +313,25 @@ export class FamilyService {
             if (!otherParents) throw new BadRequestException('the_only_parent_cannot_leave');
             await this._familyMemberRepository.softRemove(member, { data: { request: this._req } });
             const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
+            const allParents = await this._familyMemberRepository.findBy({ familyId: member.familyId, role: FamilyRoleEnum.Parent });
+            allParents.forEach((parent) => {
+                const notiRequest: CreateNotificationDto = {
+                    title: `${user?.name} đã rời khỏi gia đình`,
+                    content: '',
+                    isRead: false,
+                    type: NotificationTypeEnum.LeaveFamily,
+                    userId: parent.userId,
+                    familyId: member.familyId,
+                    data: {
+                        user: {
+                            name: user?.name,
+                            id: user?.id,
+                            avt: user?.avt,
+                        },
+                    },
+                };
+                this._notificationService.create(notiRequest);
+            });
             return {
                 ...user,
                 familyRole: null,

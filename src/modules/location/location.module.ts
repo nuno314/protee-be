@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { FamilyModule } from '../family/family.module';
 import { MessageModule } from '../message/message.module';
+import { NotificationModule } from '../notification/notification.module';
 import { SettingsModule } from '../settings/settings.module';
 import { UsersModule } from '../users/users.module';
 import { LocationController } from './controllers/location.controller';
@@ -19,6 +20,7 @@ import { LocationService } from './services/location.service';
         FamilyModule,
         UsersModule,
         SettingsModule,
+        NotificationModule,
     ],
     controllers: [LocationController],
     providers: [LocationService, LocationProfile],

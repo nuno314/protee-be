@@ -37,9 +37,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
             await socket.join(familyId);
             await this.server.to(socket.id).emit('join', `Join Room: ${familyId}`);
+
+            await socket.join(`user_notification_${isVerify.id}`);
+            await this.server.to(socket.id).emit('join', `Join Room: user_notification_${isVerify.id}`);
         } catch {
             return this._disconnect(socket);
         }
+    }
+
+    async emitUserNotificationToRoom(noti: any, room: string): Promise<void> {
+        this.server.to(room).emit('userNotification', noti);
     }
 
     async emitNotification(noti: any, socketId: string = null): Promise<void> {
