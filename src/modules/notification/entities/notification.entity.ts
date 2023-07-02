@@ -4,7 +4,7 @@ import { Column, Entity } from 'typeorm';
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { NotificationTypeEnum } from '../enums/notification-type.enum';
 
-@Entity({ synchronize: false, name: 'notifications' })
+@Entity({ synchronize: true, name: 'notifications' })
 export class NotificationEntity extends AbstractEntity {
     @Column({ default: null, nullable: true })
     @AutoMap()

@@ -168,7 +168,7 @@ export class FamilyService {
         if (member) {
             const familyInviteCode = await this._familyInviteCodeRepository.findOneBy({ familyId: member.familyId });
             return {
-                code: familyInviteCode.code,
+                code: familyInviteCode?.code,
                 user: {
                     ...user,
                     familyRole: member.role,

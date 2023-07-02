@@ -11,6 +11,8 @@ import { GetLatestNotificationResponse } from '../dto/responses';
 import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
 import { CreateNotificationDto, GetNotificationPagingRequest } from '../dto/requests';
 import { ChatGateway } from '../../message/gateway/chat.gateway';
+import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable({ scope: Scope.REQUEST })
 export class NotificationService {
@@ -21,9 +23,15 @@ export class NotificationService {
         // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
         @Inject(REQUEST) private readonly req,
         @InjectMapper() private readonly mapper: Mapper,
-        private readonly _socketGateway: ChatGateway
+        private readonly _socketGateway: ChatGateway,
+        @InjectRepository(FamilyMemberEntity)
+        private readonly _familyMemberRepository: Repository<FamilyMemberEntity>
     ) {
         this.notificationRepository = this.dataSource.getRepository(NotificationEntity);
+    }
+
+    private async _getUserFamilyId(): Promise<string> {
+        return (await this._familyMemberRepository.findOneBy({ userId: this.req.user.id }))?.familyId || '';
     }
 
     async create(notification: CreateNotificationDto): Promise<boolean> {
@@ -37,12 +45,14 @@ export class NotificationService {
     }
 
     async getLatestNotification(): Promise<GetLatestNotificationResponse> {
+        const familyId = await this._getUserFamilyId();
         const userId = this.req.user.id;
         const notifications = await this.notificationRepository.find({
             take: 10,
             order: { createdAt: 'DESC' },
             where: {
                 userId: userId,
+                familyId: familyId,
             },
         });
         const dtos: NotificationDto[] = this.mapper.mapArray(notifications, NotificationEntity, NotificationDto);
@@ -52,6 +62,7 @@ export class NotificationService {
 
         const totalUnread = await this.notificationRepository.countBy({
             userId: userId,
+            familyId: familyId,
             isRead: false,
         });
 
@@ -62,9 +73,11 @@ export class NotificationService {
 
     async get(request: GetNotificationPagingRequest): Promise<PaginationResponseDto<NotificationDto>> {
         try {
+            const familyId = await this._getUserFamilyId();
             const userId = this.req.user.id;
             const where: any = {
                 userId: userId,
+                familyId: familyId,
             };
 
             if (request.filterUnread) {
