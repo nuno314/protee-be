@@ -88,7 +88,7 @@ export class FamilyService {
 
         const members = await this._familyMemberRepository.find({
             where: { familyId: member.familyId, userId: Not(user.id) },
-            select: { id: true, role: true },
+            select: { id: true, familyId: true, userId: true, role: true },
             relations: {
                 user: true,
             },
@@ -294,14 +294,16 @@ export class FamilyService {
 
         if (!member) throw new BadRequestException('not_a_member');
 
+        let result = false;
+
         if (member.role === FamilyRoleEnum.Child) {
-            return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
+            result = !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } }));
         }
 
         const otherMembersOfFamily = await this._familyMemberRepository.findBy({ familyId: member.familyId, userId: Not(member.userId) });
 
         if (!otherMembersOfFamily.length) {
-            return { result: !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } })) };
+            result = !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } }));
         }
         try {
             const otherParents = await this._familyMemberRepository.findOneBy({
@@ -311,7 +313,11 @@ export class FamilyService {
             });
 
             if (!otherParents) throw new BadRequestException('the_only_parent_cannot_leave');
-            await this._familyMemberRepository.softRemove(member, { data: { request: this._req } });
+            result = !!(await this._familyMemberRepository.softRemove(member, { data: { request: this._req } }));
+
+            if (!result) {
+                return { result: false };
+            }
             const user = await this._userRepository.findOneBy({ id: this._req?.user?.id });
             const allParents = await this._familyMemberRepository.findBy({ familyId: member.familyId, role: FamilyRoleEnum.Parent });
             allParents.forEach((parent) => {

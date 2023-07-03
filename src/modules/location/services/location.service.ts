@@ -254,24 +254,24 @@ export class LocationService {
             });
             if (location.familyId) {
                 const allMembers = await this._familyService.getFamilyMembers();
-                const actor = allMembers.find((x) => x.userId === this._req.user.id);
+                const actor = await this._userService.getById(this._req.user.id);
                 allMembers.forEach((mem) => {
                     if (mem.userId !== this._req.user.id) {
                         const notiRequest: CreateNotificationDto = {
-                            title: `${actor.user?.name} đã thêm ${location.name} vào vị trí nguy hiểm`,
+                            title: `${actor.name} đã thêm ${location.name} vào vị trí nguy hiểm`,
                             content: '',
                             isRead: false,
                             type: NotificationTypeEnum.AddLocation,
-                            userId: mem.userId,
+                            userId: mem.user.id,
                             familyId: mem.familyId,
                             data: {
                                 locationId: location.id,
                                 locationName: location.name,
                                 createdByUserId: this._req.user.id,
                                 createdByUser: {
-                                    name: actor.user?.name,
-                                    id: actor.user?.id,
-                                    avt: actor.user?.avt,
+                                    name: actor.name,
+                                    id: actor.id,
+                                    avt: actor.avt,
                                 },
                             },
                         };
