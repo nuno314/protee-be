@@ -258,7 +258,7 @@ export class LocationService {
                 allMembers.forEach((mem) => {
                     if (mem.userId !== this._req.user.id) {
                         const notiRequest: CreateNotificationDto = {
-                            title: `${actor.name} đã thêm ${location.name} vào vị trí nguy hiểm`,
+                            title: `<p><strong>${actor.name}</strong> đã thêm <strong>${location.name}</strong> vào vị trí nguy hiểm</p>`,
                             content: '',
                             isRead: false,
                             type: NotificationTypeEnum.AddLocation,

@@ -47,13 +47,15 @@ export class NotificationService {
     async getLatestNotification(): Promise<GetLatestNotificationResponse> {
         const familyId = await this._getUserFamilyId();
         const userId = this.req.user.id;
+
+        const condition: any = {
+            userId: userId,
+        };
+        if (familyId) condition.familyId = familyId;
         const notifications = await this.notificationRepository.find({
             take: 10,
             order: { createdAt: 'DESC' },
-            where: {
-                userId: userId,
-                familyId: familyId,
-            },
+            where: condition,
         });
         const dtos: NotificationDto[] = this.mapper.mapArray(notifications, NotificationEntity, NotificationDto);
 
@@ -77,8 +79,8 @@ export class NotificationService {
             const userId = this.req.user.id;
             const where: any = {
                 userId: userId,
-                familyId: familyId,
             };
+            if (familyId) where.familyId = familyId;
 
             if (request.filterUnread) {
                 where.isRead = false;
@@ -105,7 +107,7 @@ export class NotificationService {
         }
     }
 
-    async setReadNotification(id: string): Promise<boolean> {
+    async setReadNotification(id: string): Promise<NotificationDto> {
         try {
             const userId = this.req.user.id;
             const notification = await this.notificationRepository.findOneBy({
@@ -114,19 +116,19 @@ export class NotificationService {
             });
 
             if (!notification) {
-                return false;
+                return null;
             }
 
             notification.isRead = true;
             await this.notificationRepository.save(notification, { data: { request: this.req } });
-            return true;
+            return this.mapper.map(notification, NotificationEntity, NotificationDto);
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 
-    async toggleReadNotification(id: string): Promise<boolean> {
+    async toggleReadNotification(id: string): Promise<NotificationDto> {
         try {
             const userId = this.req.user.id;
             const notification = await this.notificationRepository.findOneBy({
@@ -135,19 +137,19 @@ export class NotificationService {
             });
 
             if (!notification) {
-                return false;
+                return null;
             }
 
             notification.isRead = !notification.isRead;
             await this.notificationRepository.save(notification, { data: { request: this.req } });
-            return true;
+            return this.mapper.map(notification, NotificationEntity, NotificationDto);
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 
-    async markAllAsRead(): Promise<boolean> {
+    async markAllAsRead(): Promise<{ result: boolean }> {
         try {
             const userId = this.req.user.id;
             const notifications = await this.notificationRepository.findBy({
@@ -160,10 +162,10 @@ export class NotificationService {
 
             await this.notificationRepository.save(notifications, { data: { request: this.req } });
 
-            return true;
+            return { result: true };
         } catch (error) {
             console.log(error);
-            return false;
+            return { result: false };
         }
     }
 }

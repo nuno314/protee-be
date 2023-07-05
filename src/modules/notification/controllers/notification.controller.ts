@@ -49,7 +49,7 @@ export class NotificationController extends BaseController {
     @UseGuards(JwtAuthGuard)
     @Post('read/:id')
     @Version('1')
-    async setReadNotification(@Param('id') id: string): Promise<boolean> {
+    async setReadNotification(@Param('id') id: string): Promise<NotificationDto> {
         return await this.notificationService.setReadNotification(id);
     }
 
@@ -61,7 +61,7 @@ export class NotificationController extends BaseController {
     @UseGuards(JwtAuthGuard)
     @Post('toggle-read/:id')
     @Version('1')
-    async toggleReadNotification(@Param('id') id: string): Promise<boolean> {
+    async toggleReadNotification(@Param('id') id: string): Promise<NotificationDto> {
         return await this.notificationService.toggleReadNotification(id);
     }
 
@@ -73,7 +73,7 @@ export class NotificationController extends BaseController {
     @UseGuards(JwtAuthGuard)
     @Post('mark-all-as-read')
     @Version('1')
-    async markAllAsRead(): Promise<boolean> {
+    async markAllAsRead(): Promise<{ result: boolean }> {
         return await this.notificationService.markAllAsRead();
     }
 }

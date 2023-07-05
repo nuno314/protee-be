@@ -56,8 +56,19 @@ export class FamilyService {
         if (member.familyId !== request.familyId) throw new ForbiddenException('not_same_family');
         if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_remove_join_request');
 
+        const result = await this._joinFamilyRequestRepository.softRemove(request, { data: { request: this._req } });
+        const notiRequest: CreateNotificationDto = {
+            title: `Bạn đã bị từ chối tham gia vào gia đình`,
+            content: '',
+            isRead: false,
+            type: NotificationTypeEnum.RejectedJoinFamily,
+            userId: request.createdBy,
+            familyId: null,
+            data: {},
+        };
+        this._notificationService.create(notiRequest);
         return {
-            result: !!(await this._joinFamilyRequestRepository.softRemove(request, { data: { request: this._req } })),
+            result: !!result,
         };
     }
 
@@ -148,6 +159,16 @@ export class FamilyService {
 
             const createMemberResult = await this._familyMemberRepository.save(member, { data: { request: this._req } });
             await this._joinFamilyRequestRepository.softRemove(request);
+            const notiRequest: CreateNotificationDto = {
+                title: `Bạn đã được phê duyệt tham gia vào gia đình`,
+                content: '',
+                isRead: false,
+                type: NotificationTypeEnum.ApprovedJoinFamily,
+                userId: request.createdBy,
+                familyId: member.familyId,
+                data: {},
+            };
+            this._notificationService.create(notiRequest);
             return { result: !!createMemberResult };
         } catch (err) {
             console.log(err);
@@ -265,7 +286,7 @@ export class FamilyService {
             const user = await this._userRepository.findOneBy({ id: this._req.user.id });
             allParents.forEach((parent) => {
                 const notiRequest: CreateNotificationDto = {
-                    title: `${user?.name} đã yêu cầu tham gia gia đình`,
+                    title: `<p><strong>${user?.name}</strong> đã yêu cầu tham gia gia đình</p>`,
                     content: '',
                     isRead: false,
                     type: NotificationTypeEnum.JoinRequest,
@@ -322,7 +343,7 @@ export class FamilyService {
             const allParents = await this._familyMemberRepository.findBy({ familyId: member.familyId, role: FamilyRoleEnum.Parent });
             allParents.forEach((parent) => {
                 const notiRequest: CreateNotificationDto = {
-                    title: `${user?.name} đã rời khỏi gia đình`,
+                    title: `<p><strong>${user?.name}</strong> đã rời khỏi gia đình</p>`,
                     content: '',
                     isRead: false,
                     type: NotificationTypeEnum.LeaveFamily,

@@ -18,7 +18,7 @@ export class NotificationEntity extends AbstractEntity {
     @AutoMap()
     userId: string;
 
-    @Column({ type: 'uuid' })
+    @Column({ type: 'uuid', nullable: true })
     @AutoMap()
     familyId: string;
 
