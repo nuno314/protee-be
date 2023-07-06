@@ -94,6 +94,7 @@ export class UsersService {
             const memberInfo = await this._memberRepository.findOneBy({ userId: id });
             const dto = this._mapper.map(user, UserEntity, UserDto);
             dto.familyRole = memberInfo?.role;
+            dto.familyId = memberInfo?.familyId;
             return dto;
         } catch (err) {
             console.log(err);
