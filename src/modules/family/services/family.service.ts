@@ -105,7 +105,12 @@ export class FamilyService {
                 user: true,
             },
         });
-        return members;
+        return members.map((member: any) => {
+            member.user.familyRole = member.role;
+            member.user.familyId = member.familyId;
+
+            return member;
+        });
     }
 
     public async getJoinRequest(): Promise<JoinFamilyRequestEntity[]> {
