@@ -4,4 +4,5 @@ export enum NotificationTypeEnum {
     LeaveFamily = 'leaveFamily',
     ApprovedJoinFamily = 'approvedJoinFamily',
     RejectedJoinFamily = 'rejectedJoinFamily',
+    RemovedFromFamily = 'removedFromFamily',
 }

@@ -380,7 +380,19 @@ export class FamilyService {
 
         if (requestMember.id === memberId) throw new ForbiddenException('cannot_delete_yourself');
 
-        return { result: !!(await this._familyMemberRepository.softRemove(needToDeleteMember, { data: { request: this._req } })) };
+        const result = await this._familyMemberRepository.softRemove(needToDeleteMember, { data: { request: this._req } });
+        const notiRequest: CreateNotificationDto = {
+            title: `Bạn đã bị xoá khỏi gia đình`,
+            content: '',
+            isRead: false,
+            type: NotificationTypeEnum.RemovedFromFamily,
+            userId: needToDeleteMember.userId,
+            familyId: null,
+            data: {},
+        };
+        this._notificationService.create(notiRequest);
+
+        return { result: !!result };
     }
     public async updateChildToParent(memberId: string): Promise<StatusResponseDto> {
         const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
