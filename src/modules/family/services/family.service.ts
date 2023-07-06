@@ -10,6 +10,7 @@ import { UtilsService } from '../../../shared/services/utils.service';
 import { CreateNotificationDto } from '../../notification/dto/requests';
 import { NotificationTypeEnum } from '../../notification/enums/notification-type.enum';
 import { NotificationService } from '../../notification/services/notification.service';
+import { UserDto } from '../../users/dtos/domains/user.dto';
 import { FamilyUserDto } from '../../users/dtos/responses/user-family-response.dto';
 import { UserEntity } from '../../users/entities/users.entity';
 import { INVITE_CODE_LENGTH } from '../constant/family.constant';
@@ -150,6 +151,11 @@ export class FamilyService {
         if (member.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('only_parent_can_approve_join_request');
 
         try {
+            const memberEntity = await this._familyMemberRepository.findOneBy({ userId: request.createdBy });
+            if (memberEntity) {
+                await this._familyMemberRepository.softRemove(memberEntity);
+                await this._familyRepository.softRemove({ id: memberEntity.familyId });
+            }
             const member: FamilyMemberEntity = {
                 familyId: request.familyId,
                 userId: request.createdBy,
@@ -269,9 +275,6 @@ export class FamilyService {
                 const numberRequestJoin = await this._joinFamilyRequestRepository.countBy({ familyId: memberEntity.familyId });
                 if (numberRequestJoin > 0) throw new BadRequestException('current_family_has_waiting_join_request');
             }
-
-            await this._familyMemberRepository.softRemove(memberEntity);
-            await this._familyRepository.softRemove({ id: memberEntity.familyId });
         }
 
         try {
@@ -394,7 +397,7 @@ export class FamilyService {
 
         return { result: !!result };
     }
-    public async updateChildToParent(memberId: string): Promise<StatusResponseDto> {
+    public async updateChildToParent(memberId: string): Promise<StatusResponseDto | FamilyMemberEntity> {
         const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
 
         if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
@@ -403,15 +406,37 @@ export class FamilyService {
 
         if (!needToUpdateMember) throw new NotFoundException('member_not_found');
         if (needToUpdateMember.role === FamilyRoleEnum.Parent) throw new ForbiddenException('it_is_parent');
-        const result = await this._familyMemberRepository.save(
-            { ...needToUpdateMember, role: FamilyRoleEnum.Parent, updatedBy: this._req.user.id },
-            {
-                data: { request: this._req },
-            }
-        );
-        return { result: !!result };
+        try {
+            const result = await this._familyMemberRepository.save(
+                { ...needToUpdateMember, role: FamilyRoleEnum.Parent, updatedBy: this._req.user.id },
+                {
+                    data: { request: this._req },
+                }
+            );
+
+            const user = await this._userRepository.findOneBy({ id: needToUpdateMember.userId });
+            const notiRequest: CreateNotificationDto = {
+                title: `Bạn đã được chỉ định trở thành vai trò phụ huynh trong gia đình`,
+                content: '',
+                isRead: false,
+                type: NotificationTypeEnum.UpgradeToParent,
+                userId: user.id,
+                familyId: needToUpdateMember.familyId,
+                data: {
+                    user: {
+                        name: user?.name,
+                        id: user?.id,
+                        avt: user?.avt,
+                    },
+                },
+            };
+            this._notificationService.create(notiRequest);
+            return { ...result, user: this._mapper.map(user, UserEntity, UserDto) as any };
+        } catch (err) {
+            return { result: false };
+        }
     }
-    public async updateParentToChild(memberId: string): Promise<StatusResponseDto> {
+    public async updateParentToChild(memberId: string): Promise<StatusResponseDto | FamilyMemberEntity> {
         const requestMember = await this._familyMemberRepository.findOneBy({ userId: this._req.user?.id });
 
         if (requestMember.role !== FamilyRoleEnum.Parent) throw new ForbiddenException('no_permission');
@@ -421,12 +446,36 @@ export class FamilyService {
         if (!needToUpdateMember) throw new NotFoundException('member_not_found');
         if (needToUpdateMember.role === FamilyRoleEnum.Child) throw new ForbiddenException('it_is_child');
         if (needToUpdateMember.userId === requestMember.userId) throw new ForbiddenException('cannot_update_yourself');
-        const result = await this._familyMemberRepository.save(
-            { ...needToUpdateMember, role: FamilyRoleEnum.Child, updatedBy: this._req.user.id },
-            {
-                data: { request: this._req },
-            }
-        );
-        return { result: !!result };
+
+        try {
+            const result = await this._familyMemberRepository.save(
+                { ...needToUpdateMember, role: FamilyRoleEnum.Child, updatedBy: this._req.user.id },
+                {
+                    data: { request: this._req },
+                }
+            );
+
+            const user = await this._userRepository.findOneBy({ id: needToUpdateMember.userId });
+            const notiRequest: CreateNotificationDto = {
+                title: `Bạn đã được chỉ định trở thành vai trò trẻ em trong gia đình`,
+                content: '',
+                isRead: false,
+                type: NotificationTypeEnum.DowngradeToChild,
+                userId: user.id,
+                familyId: needToUpdateMember.familyId,
+                data: {
+                    user: {
+                        name: user?.name,
+                        id: user?.id,
+                        avt: user?.avt,
+                    },
+                },
+            };
+            this._notificationService.create(notiRequest);
+
+            return { ...result, user: this._mapper.map(user, UserEntity, UserDto) as any };
+        } catch (err) {
+            return { result: false };
+        }
     }
 }

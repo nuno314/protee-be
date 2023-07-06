@@ -5,4 +5,6 @@ export enum NotificationTypeEnum {
     ApprovedJoinFamily = 'approvedJoinFamily',
     RejectedJoinFamily = 'rejectedJoinFamily',
     RemovedFromFamily = 'removedFromFamily',
+    UpgradeToParent = 'upgradeToParent',
+    DowngradeToChild = 'downgradeToChild',
 }

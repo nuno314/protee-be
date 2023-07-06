@@ -20,6 +20,6 @@ export class UpdateAccountDto {
     @ApiProperty()
     @IsString()
     @IsOptional()
-    @IsPhoneNumber('VI')
+    // @IsPhoneNumber('VI')
     phoneNumber: string;
 }
