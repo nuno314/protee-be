@@ -52,7 +52,11 @@ export class UsersService {
             const result = await this._userRepository.save(updateUser, {
                 data: { request: this._req },
             });
-            return this._mapper.map(result, UserEntity, UserDto);
+            const memberInfo = await this._memberRepository.findOneBy({ userId: userId });
+            const dto = this._mapper.map(updateUser, UserEntity, UserDto);
+            dto.familyRole = memberInfo?.role;
+            dto.familyId = memberInfo?.familyId;
+            return dto;
         } catch (err) {
             console.log(err);
             throw err;
