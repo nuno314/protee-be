@@ -7,6 +7,7 @@ import { FindOptionsOrder, ILike, Repository } from 'typeorm';
 
 import { PaginationRequestDto } from '../../../common/dto/pagination-request.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination-response.dto';
+import { FamilyMemberEntity } from '../../family/entities/family-member.entity';
 import { UserDto } from '../dtos/domains/user.dto';
 import { UpdateAccountDto } from '../dtos/requests/update-account.dto';
 import { UpdateUserDto } from '../dtos/requests/update-user.dto';
@@ -18,7 +19,9 @@ export class UsersService {
         @Inject(REQUEST) private readonly _req,
         @InjectRepository(UserEntity)
         private readonly _userRepository: Repository<UserEntity>,
-        @InjectMapper() private readonly _mapper: Mapper
+        @InjectMapper() private readonly _mapper: Mapper,
+        @InjectRepository(FamilyMemberEntity)
+        private readonly _memberRepository: Repository<FamilyMemberEntity>
     ) {}
 
     public async update(dto: UpdateUserDto): Promise<boolean> {
@@ -88,7 +91,10 @@ export class UsersService {
             const user = await this._userRepository.findOneBy({ id });
 
             if (!user) throw new NotFoundException('user_not_found');
-            return this._mapper.map(user, UserEntity, UserDto);
+            const memberInfo = await this._memberRepository.findOneBy({ userId: id });
+            const dto = this._mapper.map(user, UserEntity, UserDto);
+            dto.familyRole = memberInfo?.role;
+            return dto;
         } catch (err) {
             console.log(err);
             return null;
